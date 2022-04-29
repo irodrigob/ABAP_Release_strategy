@@ -1,0 +1,186 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_CLAS" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <VSEOCLASS>
+    <CLSNAME>ZCL_REL_STRATEGY_MD_QUERY</CLSNAME>
+    <LANGU>S</LANGU>
+    <DESCRIPT>REL - Strategies master data - Query</DESCRIPT>
+    <STATE>1</STATE>
+    <CLSCCINCL>X</CLSCCINCL>
+    <FIXPT>X</FIXPT>
+    <UNICODE>X</UNICODE>
+   </VSEOCLASS>
+   <DESCRIPTIONS>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_STRATEGY_MD_QUERY</CLSNAME>
+     <CMPNAME>CHECK_EXIST_STRATEG_CLASSIF</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Mira si existe la estrategia en el sistema de clasificación</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_STRATEGY_MD_QUERY</CLSNAME>
+     <CMPNAME>COMPLETE_LIB_CODE_DESC</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Completa las descripciones de los códigos de liberación</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_STRATEGY_MD_QUERY</CLSNAME>
+     <CMPNAME>CONSTRUCTOR</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>CONSTRUCTOR</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_STRATEGY_MD_QUERY</CLSNAME>
+     <CMPNAME>CONVERT_T16FS_ROW_DATA</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Convierte la T16FS en una tabla</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_STRATEGY_MD_QUERY</CLSNAME>
+     <CMPNAME>GET_APPROVERS_STRATEGY</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Devuelve los aprobadores de una estrategia</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_STRATEGY_MD_QUERY</CLSNAME>
+     <CMPNAME>GET_APPROV_STRAT_FROM_GROUP</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Devuelve los aprobadores de estrategia a por grupo</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_STRATEGY_MD_QUERY</CLSNAME>
+     <CMPNAME>GET_DEPART_FROM_USERS_AUTH</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Añade los departamentos de los usuarios de AP</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_STRATEGY_MD_QUERY</CLSNAME>
+     <CMPNAME>GET_DEPART_SUBS_FROM_USERS</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Devuelve los departamento/filiales del usuario</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_STRATEGY_MD_QUERY</CLSNAME>
+     <CMPNAME>GET_DESCRIPTIONS_RELEASE_CODE</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Devuelve las descripciones de los codigos de liberación</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_STRATEGY_MD_QUERY</CLSNAME>
+     <CMPNAME>GET_GROUP_STRAG_FROM_PGROUP</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Devuelvo grupo y strategia a partir grupos de compras</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_STRATEGY_MD_QUERY</CLSNAME>
+     <CMPNAME>GET_LIBERATION_CODE_FROM_USER</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Devuelve los códigos de lib. que esta asignado un usuario</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_STRATEGY_MD_QUERY</CLSNAME>
+     <CMPNAME>GET_LIBERATION_GROUP_LIST</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Obtiene el listado de grupos de liberación</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_STRATEGY_MD_QUERY</CLSNAME>
+     <CMPNAME>GET_LIBERATION_STATUSES</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Devuelve los estados de liberación</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_STRATEGY_MD_QUERY</CLSNAME>
+     <CMPNAME>GET_LIB_GROUP_FROM_PGROUP</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Obtiene grupo liberación del grupo compra y/o sociedad</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_STRATEGY_MD_QUERY</CLSNAME>
+     <CMPNAME>GET_PGROUP_DEPART_FROM_USERS</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Devuelve grupos de compra con Dpto./filiales del usuario</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_STRATEGY_MD_QUERY</CLSNAME>
+     <CMPNAME>GET_PGROUP_FROM_DEPT_SUBS</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Devuelve los grupos de compra de un departamento(s)</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_STRATEGY_MD_QUERY</CLSNAME>
+     <CMPNAME>GET_PGROUP_INFO</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Obtiene información de los grupos de comopra</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_STRATEGY_MD_QUERY</CLSNAME>
+     <CMPNAME>GET_PGROUP_STRATEGY_FROM_USERS</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Aprobadores estrategias por grupos de compra por usuario(s)</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_STRATEGY_MD_QUERY</CLSNAME>
+     <CMPNAME>GET_PURCHASE_GROUP_BUYER</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Compradores de grupos de compra</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_STRATEGY_MD_QUERY</CLSNAME>
+     <CMPNAME>GET_PURCHASE_GROUP_FROM_USERS</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Grupos de compras filtrando por usuario</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_STRATEGY_MD_QUERY</CLSNAME>
+     <CMPNAME>GET_RELEASE_GROUP_FROM_COMPANY</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Devuelve el grupo de liberación a partir de la sociedad</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_STRATEGY_MD_QUERY</CLSNAME>
+     <CMPNAME>GET_RELEASE_GROUP_FROM_PGROUP</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Devuelve el grupo Lib. a partir del grupo de compras</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_STRATEGY_MD_QUERY</CLSNAME>
+     <CMPNAME>GET_STRATEGYS_FROM_GROUP</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Devuelve el grupo Lib. a partir del grupo de compras</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_STRATEGY_MD_QUERY</CLSNAME>
+     <CMPNAME>GET_STRATE_DATA_FROM_PGROUP</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Devuelve los datos de las estrategías por grupos de compra</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_STRATEGY_MD_QUERY</CLSNAME>
+     <CMPNAME>GET_USERNAME_DESC</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Devuelve la descripción del usuario</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_STRATEGY_MD_QUERY</CLSNAME>
+     <CMPNAME>GET_USERS_FROM_LIB_GROUP_CODE</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Devuelve los usuarios de un código o grupo liberación</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_STRATEGY_MD_QUERY</CLSNAME>
+     <CMPNAME>QUERY_CLASSIFICATION</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Búsqueda en el sistema de clasificación</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_STRATEGY_MD_QUERY</CLSNAME>
+     <CMPNAME>SORT_STRATEGIES</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Ordenación por strategia por importe y operando</DESCRIPT>
+    </SEOCOMPOTX>
+   </DESCRIPTIONS>
+  </asx:values>
+ </asx:abap>
+</abapGit>

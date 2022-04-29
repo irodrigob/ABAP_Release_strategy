@@ -1,0 +1,90 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_CLAS" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <VSEOCLASS>
+    <CLSNAME>ZCL_REL_UI_CONTROLLER</CLSNAME>
+    <LANGU>S</LANGU>
+    <DESCRIPT>REL - Controladora de peticiones frontend</DESCRIPT>
+    <STATE>1</STATE>
+    <CLSCCINCL>X</CLSCCINCL>
+    <FIXPT>X</FIXPT>
+    <UNICODE>X</UNICODE>
+   </VSEOCLASS>
+   <DESCRIPTIONS>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_UI_CONTROLLER</CLSNAME>
+     <CMPNAME>APPROVE_REQUEST</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Aprobación de solicitud</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_UI_CONTROLLER</CLSNAME>
+     <CMPNAME>GET_APPROVAL_DATA</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Obtiene los datos de aprobacion</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_UI_CONTROLLER</CLSNAME>
+     <CMPNAME>GET_FILTERS_DATA</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Obtiene los datos de los filtros pasado por parámetro</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_UI_CONTROLLER</CLSNAME>
+     <CMPNAME>GET_FILTERS_TYPE</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Obtiene los tipos de filtros configuración</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_UI_CONTROLLER</CLSNAME>
+     <CMPNAME>GET_LIBERATION_GROUP_LIST</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Obtiene el listado de grupos de liberación</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_UI_CONTROLLER</CLSNAME>
+     <CMPNAME>GET_STRATEGY_DATA_FROM_PGROUP</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Devuelve los departamento del usuario</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_UI_CONTROLLER</CLSNAME>
+     <CMPNAME>GET_SYSTEM_USERS</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Devuelve los usuarios de SAP</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_UI_CONTROLLER</CLSNAME>
+     <CMPNAME>GET_USER_DEPART_SUBS</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Devuelve los departamento del usuario</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_UI_CONTROLLER</CLSNAME>
+     <CMPNAME>GET_USER_INFO</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Devuelve la información del usuario</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_UI_CONTROLLER</CLSNAME>
+     <CMPNAME>LAUNCH_UPDATE_MASTER_DATA</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Lanza el proceso de actualización de datos maestros</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_UI_CONTROLLER</CLSNAME>
+     <CMPNAME>NEW_REQUEST_CHANGE</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Nueva solicitud de cambio</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_UI_CONTROLLER</CLSNAME>
+     <CMPNAME>TRANSFER_REQ_DATA_2_STRAG_DATA</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Transfiere la solicitud de strategia al modelo de estrategia</DESCRIPT>
+    </SEOCOMPOTX>
+   </DESCRIPTIONS>
+  </asx:values>
+ </asx:abap>
+</abapGit>

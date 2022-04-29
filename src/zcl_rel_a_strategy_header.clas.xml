@@ -1,0 +1,108 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_CLAS" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <VSEOCLASS>
+    <CLSNAME>ZCL_REL_A_STRATEGY_HEADER</CLSNAME>
+    <LANGU>S</LANGU>
+    <DESCRIPT>REL - BOPF Acciones en el nodo ROOT</DESCRIPT>
+    <STATE>1</STATE>
+    <CLSCCINCL>X</CLSCCINCL>
+    <FIXPT>X</FIXPT>
+    <UNICODE>X</UNICODE>
+   </VSEOCLASS>
+   <DESCRIPTIONS>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_A_STRATEGY_HEADER</CLSNAME>
+     <CMPNAME>ADD_STEP_APPROVER</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Añade el paso de aprobación</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_A_STRATEGY_HEADER</CLSNAME>
+     <CMPNAME>APPROVE_PROCESS</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Proceso de aprobación</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_A_STRATEGY_HEADER</CLSNAME>
+     <CMPNAME>APPROVE_STEP_WF</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Aprueba el paso en el motor de WF</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_A_STRATEGY_HEADER</CLSNAME>
+     <CMPNAME>BUILD_TBL_MSG_LOG</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Construye la tabla de log de cambios datos maestros</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_A_STRATEGY_HEADER</CLSNAME>
+     <CMPNAME>CONV_VALUE_2_MAIL_SYMBOL</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Convierte un valor al formato que espera el simbolo</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_A_STRATEGY_HEADER</CLSNAME>
+     <CMPNAME>DETERMINE_TEXT_ROL_BUYERS</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Determina el texto de rol para compradores</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_A_STRATEGY_HEADER</CLSNAME>
+     <CMPNAME>FILL_SYMBOLS_TEMPLATE_MAIL</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Rellena simbolos para la plantilla email</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_A_STRATEGY_HEADER</CLSNAME>
+     <CMPNAME>GET_MAILS_OF_APPROVERS</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Obtiene los mails de los aprobadores del paso</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_A_STRATEGY_HEADER</CLSNAME>
+     <CMPNAME>NEW_WORFLOW</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Nuevo workflow</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_A_STRATEGY_HEADER</CLSNAME>
+     <CMPNAME>READ_AP_APPROVERS</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Lee los aprobadores AP</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_A_STRATEGY_HEADER</CLSNAME>
+     <CMPNAME>SAP_SNAPSHOT</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Crear la foto de los datos de la estrategia que hay en SAP</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_A_STRATEGY_HEADER</CLSNAME>
+     <CMPNAME>SEND_MAIL_APPROVE</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Envio de mail para la aprobación</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_A_STRATEGY_HEADER</CLSNAME>
+     <CMPNAME>SEND_MAIL_APPROVED</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Envio de mail de workflow completado</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_A_STRATEGY_HEADER</CLSNAME>
+     <CMPNAME>SEND_MAIL_APPROVE_DEPART</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Envio de mail para la aprobación por parte del departamento</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_A_STRATEGY_HEADER</CLSNAME>
+     <CMPNAME>SEND_MAIL_CHANGE_MD</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Envio mail de datos maestros modificados</DESCRIPT>
+    </SEOCOMPOTX>
+   </DESCRIPTIONS>
+  </asx:values>
+ </asx:abap>
+</abapGit>

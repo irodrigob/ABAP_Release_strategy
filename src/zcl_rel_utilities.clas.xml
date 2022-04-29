@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_CLAS" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <VSEOCLASS>
+    <CLSNAME>ZCL_REL_UTILITIES</CLSNAME>
+    <LANGU>S</LANGU>
+    <DESCRIPT>REL - Utilidades generales</DESCRIPT>
+    <STATE>1</STATE>
+    <CLSCCINCL>X</CLSCCINCL>
+    <FIXPT>X</FIXPT>
+    <UNICODE>X</UNICODE>
+   </VSEOCLASS>
+   <DESCRIPTIONS>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_UTILITIES</CLSNAME>
+     <CMPNAME>CONV_ATINN_2_ATNAM</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Convierte el codigo interno de la característica al externo</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_UTILITIES</CLSNAME>
+     <CMPNAME>CONV_PARAMS_2_RANGES</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Convierte un parámetro de seleccion en ranges</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_UTILITIES</CLSNAME>
+     <CMPNAME>CTBP_CONVERT_VALUE_EXT_TO_INT</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Convierte el valor externo de un carácterística a interno</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_UTILITIES</CLSNAME>
+     <CMPNAME>CTBP_CONVERT_VALUE_INT_TO_EXT</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Convierte el valor interno de un carácterística a externo</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_UTILITIES</CLSNAME>
+     <CMPNAME>FORMAT_CLASSIF_AMOUNT_CHAR</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Formate los importes de la clasificación a char</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_UTILITIES</CLSNAME>
+     <CMPNAME>TRANSFER_REQ_DATA_2_STRAG_DATA</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Transfiere la solicitud de strategia al modelo de estrategia</DESCRIPT>
+    </SEOCOMPOTX>
+   </DESCRIPTIONS>
+  </asx:values>
+ </asx:abap>
+</abapGit>

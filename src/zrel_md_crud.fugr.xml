@@ -1,0 +1,193 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_FUGR" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <AREAT>REL - Funciones CRUD de Datos Maestros</AREAT>
+   <INCLUDES>
+    <SOBJ_NAME>LZREL_MD_CRUDTOP</SOBJ_NAME>
+    <SOBJ_NAME>SAPLZREL_MD_CRUD</SOBJ_NAME>
+   </INCLUDES>
+   <FUNCTIONS>
+    <item>
+     <FUNCNAME>ZREL_LAUNCH_MASTER_DATA</FUNCNAME>
+     <REMOTE_CALL>R</REMOTE_CALL>
+     <SHORT_TEXT>REL - Lanza proceso de actualización datos maestros</SHORT_TEXT>
+     <IMPORT>
+      <RSIMP>
+       <PARAMETER>IV_REQUEST_ID</PARAMETER>
+       <TYP>ZREL_T010-REQUEST_ID</TYP>
+      </RSIMP>
+      <RSIMP>
+       <PARAMETER>IV_LANGU</PARAMETER>
+       <DEFAULT>SY-LANGU</DEFAULT>
+       <TYP>SYLANGU</TYP>
+      </RSIMP>
+     </IMPORT>
+     <EXPORT>
+      <RSEXP>
+       <PARAMETER>ET_RETURN</PARAMETER>
+       <TYP>BAPIRET2_T</TYP>
+      </RSEXP>
+     </EXPORT>
+     <DOCUMENTATION>
+      <RSFDO>
+       <PARAMETER>IV_REQUEST_ID</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>REL - ID de solicitud de cambio</STEXT>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>IV_LANGU</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>Clave de idioma</STEXT>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>ET_RETURN</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>Tabla retorno</STEXT>
+      </RSFDO>
+     </DOCUMENTATION>
+    </item>
+    <item>
+     <FUNCNAME>ZREL_UPDATE_SAP_CUSTO</FUNCNAME>
+     <REMOTE_CALL>R</REMOTE_CALL>
+     <SHORT_TEXT>REL - Actualización del customizing de SAP</SHORT_TEXT>
+     <IMPORT>
+      <RSIMP>
+       <PARAMETER>IT_T16FS</PARAMETER>
+       <OPTIONAL>X</OPTIONAL>
+       <TYP>ZREL_I_T16FS</TYP>
+      </RSIMP>
+      <RSIMP>
+       <PARAMETER>IT_T16FT</PARAMETER>
+       <OPTIONAL>X</OPTIONAL>
+       <TYP>ZREL_I_T16FT</TYP>
+      </RSIMP>
+      <RSIMP>
+       <PARAMETER>IV_COMMIT</PARAMETER>
+       <DEFAULT>ABAP_TRUE</DEFAULT>
+       <OPTIONAL>X</OPTIONAL>
+       <TYP>SAP_BOOL</TYP>
+      </RSIMP>
+      <RSIMP>
+       <PARAMETER>IV_LANGU</PARAMETER>
+       <DEFAULT>SY-LANGU</DEFAULT>
+       <OPTIONAL>X</OPTIONAL>
+       <TYP>SYLANGU</TYP>
+      </RSIMP>
+      <RSIMP>
+       <PARAMETER>IT_T16FK</PARAMETER>
+       <OPTIONAL>X</OPTIONAL>
+       <TYP>ZREL_I_T16FK</TYP>
+      </RSIMP>
+      <RSIMP>
+       <PARAMETER>IT_T16FV</PARAMETER>
+       <OPTIONAL>X</OPTIONAL>
+       <TYP>ZREL_I_T16FV</TYP>
+      </RSIMP>
+      <RSIMP>
+       <PARAMETER>IT_T16FW</PARAMETER>
+       <OPTIONAL>X</OPTIONAL>
+       <TYP>ZREL_I_T16FW</TYP>
+      </RSIMP>
+      <RSIMP>
+       <PARAMETER>IT_T16FD</PARAMETER>
+       <OPTIONAL>X</OPTIONAL>
+       <TYP>ZREL_I_T16FD</TYP>
+      </RSIMP>
+      <RSIMP>
+       <PARAMETER>IT_T16FC</PARAMETER>
+       <OPTIONAL>X</OPTIONAL>
+       <TYP>ZREL_I_T16FC</TYP>
+      </RSIMP>
+      <RSIMP>
+       <PARAMETER>IT_T16FW_DELETE</PARAMETER>
+       <OPTIONAL>X</OPTIONAL>
+       <TYP>ZREL_I_T16FW</TYP>
+      </RSIMP>
+      <RSIMP>
+       <PARAMETER>IT_T16FK_DELETE</PARAMETER>
+       <OPTIONAL>X</OPTIONAL>
+       <TYP>ZREL_I_T16FK</TYP>
+      </RSIMP>
+      <RSIMP>
+       <PARAMETER>IT_T16FV_DELETE</PARAMETER>
+       <OPTIONAL>X</OPTIONAL>
+       <TYP>ZREL_I_T16FV</TYP>
+      </RSIMP>
+     </IMPORT>
+     <EXPORT>
+      <RSEXP>
+       <PARAMETER>ET_RETURN</PARAMETER>
+       <TYP>BAPIRET2_T</TYP>
+      </RSEXP>
+     </EXPORT>
+     <DOCUMENTATION>
+      <RSFDO>
+       <PARAMETER>IT_T16FS</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>REL - Tabla interna de T16FS</STEXT>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>IT_T16FT</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>REL - Tabla interna de T16FT</STEXT>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>IV_COMMIT</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>¿Hacer commit?</STEXT>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>IV_LANGU</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>Clave de idioma</STEXT>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>IT_T16FK</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>REL - IT Tabla interna de T16FK</STEXT>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>IT_T16FV</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>REL - Tabla interna de T16FV</STEXT>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>IT_T16FW</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>REL - Tabla interna de T16FW</STEXT>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>IT_T16FD</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>REL - Tabla interna de T16FD</STEXT>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>IT_T16FC</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>REL - Tabla interna de T16FC</STEXT>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>IT_T16FW_DELETE</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>REL - Tabla interna de T16FW</STEXT>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>IT_T16FK_DELETE</PARAMETER>
+       <KIND>P</KIND>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>IT_T16FV_DELETE</PARAMETER>
+       <KIND>P</KIND>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>ET_RETURN</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>Tabla retorno</STEXT>
+      </RSFDO>
+     </DOCUMENTATION>
+    </item>
+   </FUNCTIONS>
+  </asx:values>
+ </asx:abap>
+</abapGit>

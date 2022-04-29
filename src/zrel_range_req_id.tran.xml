@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_TRAN" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <TSTC>
+    <TCODE>ZREL_RANGE_REQ_ID</TCODE>
+    <PGMNA>SAPMSNUM</PGMNA>
+    <DYPNO>0100</DYPNO>
+    <CINFO>Ag==</CINFO>
+   </TSTC>
+   <TSTCC>
+    <TCODE>ZREL_RANGE_REQ_ID</TCODE>
+    <S_WEBGUI>1</S_WEBGUI>
+   </TSTCC>
+   <TSTCT>
+    <SPRSL>S</SPRSL>
+    <TCODE>ZREL_RANGE_REQ_ID</TCODE>
+    <TTEXT>Actual.rango núm.: ZREL_REQID</TTEXT>
+   </TSTCT>
+   <TSTCP>
+    <TCODE>ZREL_RANGE_REQ_ID</TCODE>
+    <PARAM>/NSNUM TNRO-OBJECT=ZREL_REQID</PARAM>
+   </TSTCP>
+  </asx:values>
+ </asx:abap>
+</abapGit>

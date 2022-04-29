@@ -1,0 +1,250 @@
+INTERFACE zif_rel_data
+  PUBLIC .
+  TYPES: tt_r_username TYPE RANGE OF xubname.
+  TYPES: tt_r_date TYPE RANGE OF datum.
+  TYPES: tt_r_liberation_group TYPE RANGE OF t16fs-frggr.
+  TYPES: tt_r_liberation_code TYPE RANGE OF t16fw-frgco.
+  TYPES: tt_r_strategy_code TYPE RANGE OF t16fs-frgsx.
+  TYPES: tt_r_dept_subs TYPE RANGE OF zrel_e_depart_subsidiary.
+  TYPES: tt_r_purchase_group TYPE RANGE OF ekgrp.
+  TYPES: tt_r_request_status TYPE RANGE OF zrel_bo_sp_strategy_header-request_status.
+  TYPES: tt_r_request_id TYPE RANGE OF zrel_bo_sp_strategy_header-request_id.
+  TYPES: tt_r_wf_id TYPE RANGE OF zrel_bo_sp_strategy_header-wf_id.
+  TYPES: tt_r_bukrs TYPE RANGE OF t001-bukrs.
+
+  TYPES: BEGIN OF ts_users,
+           username      TYPE xubname,
+           username_desc TYPE string,
+         END OF ts_users.
+  TYPES: tt_users TYPE STANDARD TABLE OF ts_users WITH DEFAULT KEY.
+  TYPES: BEGIN OF ts_users_purchase_group.
+      INCLUDE TYPE ts_users.
+  TYPES: purchase_group      TYPE ekgrp,
+         purchase_group_desc TYPE eknam,
+         END OF ts_users_purchase_group.
+  TYPES: tt_users_purchase_group TYPE STANDARD TABLE OF ts_users_purchase_group WITH EMPTY KEY.
+
+  " Tipos de datos de compradores
+  TYPES: BEGIN OF ts_buyers,
+           username      TYPE xubname,
+           username_desc TYPE string,
+           cdchngind     TYPE cdchngind,
+         END OF ts_buyers.
+  TYPES: tt_buyers TYPE STANDARD TABLE OF ts_buyers WITH EMPTY KEY.
+  " Tipo de datos para la obtención/actualización de los aprobadores de las estrategias
+  TYPES: BEGIN OF ts_strategy_approvers,
+           level            TYPE int1,
+           code             TYPE t16fw-frgco,
+           username         TYPE xubname,
+           username_desc    TYPE string,
+           cdchngind        TYPE cdchngind,
+           type_change      TYPE zrel_bo_sc_strategy_approvers-type_change,
+           type_change_desc TYPE string,
+           reason_change    TYPE zrel_bo_sc_strategy_approvers-type_change_desc,
+         END OF ts_strategy_approvers.
+  TYPES: tt_strategy_approv TYPE STANDARD TABLE OF ts_strategy_approvers WITH EMPTY KEY.
+  " Tipo de datos para la obtención/actualización de los datos de las estrategias
+  TYPES: BEGIN OF ts_strategy_data,
+           level          TYPE int1,
+           group          TYPE t16fs-frggr,
+           strategy       TYPE t16fs-frgsx,
+           amount_char    TYPE ausp-atwrt,
+           amount_operand TYPE zrel_e_strategy_operand,
+           amount         TYPE zrel_e_strategy_amount,
+           amount2        TYPE zrel_e_strategy_amount,
+           currency       TYPE waers,
+           cdchngind      TYPE cdchngind,
+           approvers      TYPE tt_strategy_approv,
+         END OF ts_strategy_data.
+  TYPES: tt_strategy_data TYPE STANDARD TABLE OF ts_strategy_data WITH EMPTY KEY.
+  " Tipo de datos para la obtención de los datos de estrategias por grupos de compra
+  TYPES: BEGIN OF ts_pgroup_strategy_data,
+           purchase_group      TYPE ekgrp,
+           purchase_group_desc TYPE eknam,
+           strategies          TYPE tt_strategy_data,
+         END OF ts_pgroup_strategy_data.
+  TYPES: tt_pgroup_strategy_data TYPE STANDARD TABLE OF ts_pgroup_strategy_data WITH EMPTY KEY.
+
+  " tipo de datos para la obtención de la información de las estrategias de liberación
+  TYPES: BEGIN OF ts_pgroup_all_data,
+           dept_subs                     TYPE zrel_t002-dept_subs,
+           dept_subs_desc                TYPE zrel_t002t-description,
+           purchase_group                TYPE ekgrp,
+           purchase_group_desc           TYPE eknam,
+           purchase_group_requested_desc TYPE eknam,
+           cdchngind                     TYPE cdchngind,
+           company                       TYPE bukrs,
+           company_desc                  TYPE t001-butxt,
+           request_status                TYPE zrel_e_request_status,
+           request_status_desc           TYPE zrel_e_request_status_desc,
+           request_id                    TYPE zrel_e_request_id,
+           request_by                    TYPE zrel_e_request_by,
+           request_by_desc               TYPE ad_namtext,
+           request_date                  TYPE zrel_e_request_date,
+           request_time                  TYPE zrel_e_request_time,
+           approval_reason               TYPE zrel_e_approval_reason,
+           approved_by                   TYPE zrel_bo_sp_strategy_header-approved_by,
+           approved_by_desc              TYPE ad_namtext,
+           approved_date                 TYPE zrel_bo_sp_strategy_header-approved_date,
+           approved_time                 TYPE zrel_bo_sp_strategy_header-approved_time,
+           approved_reason               TYPE zrel_bo_sp_strategy_header-approved_reason,
+           department_approver           TYPE syuname,
+           department_approver_desc      TYPE ad_namtext,
+           department_approver_reason    TYPE string,
+           forwarded_by                  TYPE syuname,
+           forwarded_by_desc             TYPE string,
+           forwarded_date                TYPE syst_datum,
+           forwarded_time                TYPE syst_uzeit,
+           forwarded_allow               TYPE sap_bool,
+           buyers                        TYPE tt_buyers,
+           buyers_requested              TYPE tt_buyers,
+           strategies                    TYPE tt_strategy_data,
+           strategies_requested          TYPE tt_strategy_data,
+         END OF ts_pgroup_all_data.
+  TYPES: tt_pgroup_all_data TYPE STANDARD TABLE OF ts_pgroup_all_data WITH EMPTY KEY.
+
+  " Tipo de datos para la solicitu de cambio de un grupo de compras desde la estrategia
+  TYPES: BEGIN OF ts_pgroup_request_change,
+           purchase_group      TYPE ekgrp,
+           purchase_group_desc TYPE eknam,
+           approval_reason     TYPE zrel_e_approval_reason,
+           company             TYPE bukrs,
+           cdchngind           TYPE cdchngind,
+           buyers              TYPE tt_buyers,
+           strategies          TYPE tt_strategy_data,
+         END OF ts_pgroup_request_change.
+
+  CONSTANTS: cv_id_constant TYPE progname VALUE 'REL'.
+  CONSTANTS cv_app TYPE zca_e_appl VALUE 'ZSTR_LIB'.
+  CONSTANTS: BEGIN OF cs_msg,
+               type_error   TYPE bapi_mtype VALUE 'E',
+               type_dump    TYPE bapi_mtype VALUE 'X',
+               type_success TYPE bapi_mtype VALUE 'S',
+               type_warning TYPE bapi_mtype VALUE 'W',
+               type_info    TYPE bapi_mtype VALUE 'I',
+               id           TYPE arbgb VALUE 'ZREL_STRAG',
+             END OF cs_msg.
+  CONSTANTS: BEGIN OF cs_strategy,
+               BEGIN OF classification,
+                 klart  TYPE ausp-klart VALUE '032',
+                 klasse TYPE klasse_d VALUE 'GXX_EKKO',
+                 BEGIN OF value_relation,
+                   between      TYPE atcod VALUE '3',
+                   less_than    TYPE atcod VALUE '7',
+                   less         TYPE atcod VALUE '6',
+                   greater      TYPE atcod VALUE '8',
+                   greater_than TYPE atcod VALUE '9',
+                 END OF value_relation,
+                 BEGIN OF fields_charac,
+                   bsart TYPE ausp-atinn VALUE '0000000238',
+                   ekgrp TYPE ausp-atinn VALUE '0000000239',
+                   gnetw TYPE ausp-atinn VALUE '0000000240',
+                 END OF fields_charac,
+                 BEGIN OF query,
+                   BEGIN OF fields,
+                     objek TYPE rsscr_name VALUE 'OBJEK',
+                     atinn TYPE rsscr_name VALUE 'ATINN',
+                     atwrt TYPE rsscr_name VALUE 'ATWRT',
+                   END OF fields,
+                 END OF query,
+               END OF classification,
+               BEGIN OF change_request,
+                 snro_object           TYPE nrobj VALUE 'ZREL_REQID',
+                 snro_nrrange          TYPE nrnr VALUE '01',
+                 strategy_ini_char_new TYPE c LENGTH 1 VALUE '@',
+                 BEGIN OF templates,
+                   appl TYPE zca_e_appl VALUE 'ZREL_STRAG',
+                 END OF templates,
+                 BEGIN OF change_indicator,
+                   insert TYPE cdchngind VALUE 'I',
+                   update TYPE cdchngind VALUE 'U',
+                   delete TYPE cdchngind VALUE 'D',
+                 END OF change_indicator,
+                 BEGIN OF approvals,
+                   BEGIN OF request_status,
+                     pending              TYPE zrel_e_request_status VALUE 'PD',
+                     approved             TYPE zrel_e_request_status VALUE 'AP',
+                     pending_confirmation TYPE zrel_e_request_status VALUE 'PC',
+                     rejected             TYPE zrel_e_request_status VALUE 'RE',
+                     domain               TYPE domname VALUE 'ZREL_D_REQUEST_STATUS',
+                   END OF request_status,
+                   BEGIN OF action_approve,
+                     approve TYPE zrel_e_action_approv VALUE 'A',
+                     reject  TYPE zrel_e_action_approv VALUE 'R',
+                   END OF action_approve,
+                 END OF approvals,
+                 BEGIN OF type_change_approver,
+                   domain           TYPE domname VALUE 'ZREL_D_APPROVER_TYPE_CHANGE',
+                   cancelation      TYPE zrel_e_approver_type_change VALUE 'CA',
+                   change_functions TYPE zrel_e_approver_type_change VALUE 'CF',
+                 END OF type_change_approver,
+               END OF change_request,
+               BEGIN OF master_data,
+                 otype_usersap     TYPE t16fw-otype VALUE 'US',
+                 workflow_function TYPE t16fc-frgwf VALUE '1',
+                 BEGIN OF change_md_status,
+                   domain  TYPE domname VALUE 'ZREL_D_CHANGE_MD_STATUS',
+                   pending TYPE zrel_e_change_md_status VALUE 'PD',
+                   done    TYPE zrel_e_change_md_status VALUE 'DO',
+                   error   TYPE zrel_e_change_md_status VALUE 'ER',
+                 END OF change_md_status,
+                 BEGIN OF blocks,
+                   buyers    TYPE zrel_e_md_block VALUE 'BUYERS',
+                   amount    TYPE zrel_e_md_block VALUE 'AMOUNT',
+                   approvers TYPE zrel_e_md_block VALUE 'APPROVERS',
+                   pgroup    TYPE zrel_e_md_block VALUE 'PGROUP',
+                   custo_sap TYPE zrel_e_md_block VALUE 'CUSTO_SAP',
+                 END OF blocks,
+                 BEGIN OF release_indicator,
+                   blocked  TYPE frgkx VALUE '0',
+                   released TYPE frgkx VALUE '2',
+                 END OF release_indicator,
+                 BEGIN OF release_strag_indicator,
+                   without  TYPE frga1 VALUE '',
+                   fixed    TYPE frga1 VALUE 'X',
+                   required TYPE frga1 VALUE '+',
+                 END OF release_strag_indicator,
+                 BEGIN OF notification,
+                   BEGIN OF types,
+                     all   TYPE zrel_e_notification_type VALUE 'A',
+                     error TYPE zrel_e_notification_type VALUE 'E',
+                   END OF types,
+                 END OF notification,
+               END OF master_data,
+             END OF cs_strategy.
+  CONSTANTS: BEGIN OF cs_wf_engine,
+               workflow TYPE zwfe_e_workflow VALUE 'LIB_STRATEGY',
+               BEGIN OF status,
+                 pending_ap            TYPE zwfe_t002-status VALUE 'E0001',
+                 pending_approv_depart TYPE zwfe_t002-status VALUE 'E0002',
+                 pending_ap_final      TYPE zwfe_t002-status VALUE 'E0003',
+                 completed             TYPE zwfe_t002-status VALUE 'COMPL',
+               END OF status,
+               BEGIN OF field_values,
+                 department             TYPE zwfe_e_fieldname VALUE 'DEPT_SUBS',
+                 request_id             TYPE zwfe_e_fieldname VALUE 'REQUEST_ID',
+                 db_key                 TYPE zwfe_e_fieldname VALUE 'DB_KEY',
+                 purchase_group         TYPE zwfe_e_fieldname VALUE 'PURCHASE_GROUP',
+                 depart_approver        TYPE zwfe_e_fieldname VALUE 'DEPARTMENT_APPROVER',
+                 depart_approver_reason TYPE zwfe_e_fieldname VALUE 'DEPARTMENT_APPROVER_REASON',
+                 approval_reason_ap     TYPE zwfe_e_fieldname VALUE 'APPROVAL_REASON_AP',
+                 approval_reason_depart TYPE zwfe_e_fieldname VALUE 'APPROVAL_REASON_DEPART',
+               END OF field_values,
+               BEGIN OF step_approvers,
+                 ap_approver  TYPE zwfe_e_owner  VALUE 'AP_APPROVE',
+                 ds_approvers TYPE zwfe_e_owner VALUE 'DS_APPROV',
+               END OF step_approvers,
+             END OF cs_wf_engine.
+  CONSTANTS:BEGIN OF cs_general_master_data,
+              BEGIN OF users,
+                dialog_user TYPE usr02-ustyp VALUE 'A',
+              END OF users,
+            END OF cs_general_master_data.
+  CONSTANTS: BEGIN OF cs_connectivity,
+               BEGIN OF system_type,
+                 r3       TYPE zrel_e_sys_type VALUE 'S',
+                 grd_rol  TYPE zrel_e_sys_type VALUE 'R',
+                 grd_user TYPE zrel_e_sys_type VALUE 'U',
+               END OF system_type,
+             END OF cs_connectivity.
+ENDINTERFACE.

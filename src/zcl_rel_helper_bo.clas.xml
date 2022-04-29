@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_CLAS" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <VSEOCLASS>
+    <CLSNAME>ZCL_REL_HELPER_BO</CLSNAME>
+    <LANGU>S</LANGU>
+    <DESCRIPT>REL - Método de ayuda para el BOPF</DESCRIPT>
+    <STATE>1</STATE>
+    <CLSCCINCL>X</CLSCCINCL>
+    <FIXPT>X</FIXPT>
+    <UNICODE>X</UNICODE>
+   </VSEOCLASS>
+   <DESCRIPTIONS>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_HELPER_BO</CLSNAME>
+     <CMPNAME>CONSTRUCTOR</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>CONSTRUCTOR</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_HELPER_BO</CLSNAME>
+     <CMPNAME>GET_HEADER_FROM_KEY_FIELDS</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Obtiene los datos de cabecera a partir de los campos claves</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_HELPER_BO</CLSNAME>
+     <CMPNAME>MODIFY_DATA_BOPF</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Grabación de datos en el BOPF</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_HELPER_BO</CLSNAME>
+     <CMPNAME>QUERY_ALL_DATA_FROM_HEADER</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Obtención de datos a partir del nodo cabecera</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CLSNAME>ZCL_REL_HELPER_BO</CLSNAME>
+     <CMPNAME>SAVE_DATA_BOPF</CMPNAME>
+     <LANGU>S</LANGU>
+     <DESCRIPT>Grabación de datos en el BOPF</DESCRIPT>
+    </SEOCOMPOTX>
+   </DESCRIPTIONS>
+  </asx:values>
+ </asx:abap>
+</abapGit>

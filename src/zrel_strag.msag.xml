@@ -1,0 +1,248 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_MSAG" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <T100A>
+    <ARBGB>ZREL_STRAG</ARBGB>
+    <MASTERLANG>S</MASTERLANG>
+    <STEXT>REL - Mensajes estrategía liberación</STEXT>
+   </T100A>
+   <T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZREL_STRAG</ARBGB>
+     <MSGNR>000</MSGNR>
+     <TEXT>&amp; &amp; &amp; &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZREL_STRAG</ARBGB>
+     <MSGNR>001</MSGNR>
+     <TEXT>El usuario &amp; no existe</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZREL_STRAG</ARBGB>
+     <MSGNR>002</MSGNR>
+     <TEXT>Error al generar el ID de solicitud</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZREL_STRAG</ARBGB>
+     <MSGNR>003</MSGNR>
+     <TEXT>La solicitud &amp; se ha enviado a aprobar</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZREL_STRAG</ARBGB>
+     <MSGNR>004</MSGNR>
+     <TEXT>Se ha producido un error al enviar la solicitud</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZREL_STRAG</ARBGB>
+     <MSGNR>005</MSGNR>
+     <TEXT>Workflow lanzado correctamente</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZREL_STRAG</ARBGB>
+     <MSGNR>006</MSGNR>
+     <TEXT>Error al crear el workflow</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZREL_STRAG</ARBGB>
+     <MSGNR>007</MSGNR>
+     <TEXT>La solicitud &amp; no existe</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZREL_STRAG</ARBGB>
+     <MSGNR>008</MSGNR>
+     <TEXT>La solicitud &amp; ha sido procesada</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZREL_STRAG</ARBGB>
+     <MSGNR>009</MSGNR>
+     <TEXT>La solicitud &amp; no tiene asociado ningún workflow</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZREL_STRAG</ARBGB>
+     <MSGNR>010</MSGNR>
+     <TEXT>Se ha producido un error al aprobar la solicitud</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZREL_STRAG</ARBGB>
+     <MSGNR>011</MSGNR>
+     <TEXT>Aprobación realizada correctamente</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZREL_STRAG</ARBGB>
+     <MSGNR>012</MSGNR>
+     <TEXT>La solicitud &amp; ha sido rechazada</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZREL_STRAG</ARBGB>
+     <MSGNR>013</MSGNR>
+     <TEXT>La solicitud &amp; ya ha sido tratada por completo</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZREL_STRAG</ARBGB>
+     <MSGNR>014</MSGNR>
+     <TEXT>La solicitud &amp; no permite el cambio de datos maestros</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZREL_STRAG</ARBGB>
+     <MSGNR>015</MSGNR>
+     <TEXT>Compradores actualizados correctamente para el grupo de compras &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZREL_STRAG</ARBGB>
+     <MSGNR>016</MSGNR>
+     <TEXT>Se han producido errores al actualizar el grupo de compras &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZREL_STRAG</ARBGB>
+     <MSGNR>017</MSGNR>
+     <TEXT>El grupo de compras &amp; ha sido actualizado correctamente</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZREL_STRAG</ARBGB>
+     <MSGNR>018</MSGNR>
+     <TEXT>Los datos se han actualizado en SAP correctamente.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZREL_STRAG</ARBGB>
+     <MSGNR>019</MSGNR>
+     <TEXT>No se ha podido actualizar en SAP los datos. IT ha sido notificado.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZREL_STRAG</ARBGB>
+     <MSGNR>020</MSGNR>
+     <TEXT>Se ha actualizado el grupo de compras &amp; correctamente.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZREL_STRAG</ARBGB>
+     <MSGNR>021</MSGNR>
+     <TEXT>Se ha producido un error al actualizar el grupo de compras &amp;.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZREL_STRAG</ARBGB>
+     <MSGNR>022</MSGNR>
+     <TEXT>Importe actualizado correctamente para la estratégia &amp; &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZREL_STRAG</ARBGB>
+     <MSGNR>023</MSGNR>
+     <TEXT>Error</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZREL_STRAG</ARBGB>
+     <MSGNR>024</MSGNR>
+     <TEXT>Éxito</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZREL_STRAG</ARBGB>
+     <MSGNR>025</MSGNR>
+     <TEXT>Se ha lanzado el proceso de actualización en SAP</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZREL_STRAG</ARBGB>
+     <MSGNR>026</MSGNR>
+     <TEXT>No se ha podido determinar grupo de liberación para el grupo de compras &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZREL_STRAG</ARBGB>
+     <MSGNR>027</MSGNR>
+     <TEXT>No se ha podido determinar estrategía liberación para el grupo lib. &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZREL_STRAG</ARBGB>
+     <MSGNR>028</MSGNR>
+     <TEXT>Datos actualizados en la tabla T16FS</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZREL_STRAG</ARBGB>
+     <MSGNR>029</MSGNR>
+     <TEXT>Datos actualizados en la tabla T16FT</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZREL_STRAG</ARBGB>
+     <MSGNR>030</MSGNR>
+     <TEXT>No se han encontrado estrategias libres para el grupo &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZREL_STRAG</ARBGB>
+     <MSGNR>031</MSGNR>
+     <TEXT>&amp;: Error al actualizar la tabla &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZREL_STRAG</ARBGB>
+     <MSGNR>032</MSGNR>
+     <TEXT>&amp;: Tabla &amp; actualizada correctamente</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZREL_STRAG</ARBGB>
+     <MSGNR>033</MSGNR>
+     <TEXT>Se ha producido el siguiente error al llamar al sistema &amp;: &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZREL_STRAG</ARBGB>
+     <MSGNR>034</MSGNR>
+     <TEXT>No se ha podido determinar código liberación para el grupo lib. &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZREL_STRAG</ARBGB>
+     <MSGNR>035</MSGNR>
+     <TEXT>Incosistencia: No existe registro en la tabla MT_T16FS</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZREL_STRAG</ARBGB>
+     <MSGNR>036</MSGNR>
+     <TEXT>Reenvio realizado correctamente</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZREL_STRAG</ARBGB>
+     <MSGNR>037</MSGNR>
+     <TEXT>Nota: La asignación de roles a compradores se efectuara en un plazo</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZREL_STRAG</ARBGB>
+     <MSGNR>038</MSGNR>
+     <TEXT>máximo de 24 horas.</TEXT>
+    </T100>
+   </T100>
+  </asx:values>
+ </asx:abap>
+</abapGit>

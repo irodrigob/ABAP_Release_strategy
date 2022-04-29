@@ -1,0 +1,15 @@
+CLASS zcl_rel_json_handler_ui5 DEFINITION
+  PUBLIC
+  INHERITING FROM zcl_json_handler_base_ui5
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+  PROTECTED SECTION.
+  PRIVATE SECTION.
+ENDCLASS.
+
+
+
+CLASS zcl_rel_json_handler_ui5 IMPLEMENTATION.
+ENDCLASS.
