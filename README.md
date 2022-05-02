@@ -25,6 +25,10 @@ Hay que tener claro que habrá que migrar el código existente por el nuevo sist
 
 Más que una dependencia es que hay un proceso importante en la aplicación que son los compradores. Estos compradores salen de una tabla Z propía del cliente que no estará en el sistema donde se ponga. Hay que tenerlo en cuenta porque será otro motivo por el cual dará error al activar la aplicación.
 
+## Constantes
+
+El programa hace uso de la [utilidad de constantes](https://github.com/irodrigob/ABAP_Constants) para parametrizaciones generales de la aplicación. 
+
 # Definición y funcionamiento general
 
 ## Definición
@@ -80,7 +84,47 @@ Esta configuración permite dar permisos a usuarios que no son comopradores ni a
 
 ![conf autorizacion](https://github.com/irodrigob/ABAP_Release_strategy/blob/main/docs/conf_autorizaciones.png)
 
-En el primer nivel tenemos los roles que tiene la aplicación. Estos roles no pueden ser cambiados ya que afectaría al funcionamiento de la aplicación. Una vez seleccionado el segun nivel permite indicar los usuarios de dicho rol:
+En el primer nivel tenemos los roles que tiene la aplicación. Estos roles no pueden ser cambiados ya que afectaría al funcionamiento de la aplicación. Una vez seleccionado el segun nivel permite indicar los usuarios de dicho rol y el departamento.:
 
 ![conf autorizacion2](https://github.com/irodrigob/ABAP_Release_strategy/blob/main/docs/conf_autorizaciones2.png)
 
+Si no se indica el departamento tendrá permisos para todos los departamentos. También se pueden dar permiso distintos para varios departamentos.
+
+Hay un método más directa y es a través de la transacción *ZREL_T005*, esta en la misma carpeta que la transacción principal, que permite ver todos los datos de golpe sin niveles.
+
+## Estrategías
+
+Dentro del menú de ámbito *ZREL_STRAG* esta la carpeta *Parametrozación->Estrategias* donde tenemos las siguientes transacciones:
+
+* ZREL_RANGE_REQ_ID -> Transacción para mantener el rango de numero de las solicitudes. Sin el intervalo informado se producirá un error al crear la solicitu de cambio.
+* ZREL_T024 -> Esta transacción podemos llamarla obsoleta. Antes cuando se crea una estrategia de cero el grupo de liberación a utilizar se determinaba a partir del país del grupo de compras. Esto se cambio para que se solicitará en pantalla. Se deja por si es necesario en otro tipo de proyectos.
+* ZREL_T025 -> Permite indica que grupos de compras se quieren que no se muestren, por lo tanto que no haya cambios, en la aplicación. Esta pensado para grupos de compra restringidos, grupos obsoletos, etc..
+
+## Servicios
+
+Dentro del menú de ámbito *ZREL_STRAG* esta la carpeta *Parametrozación->Servicios* donde tenemos las siguientes transacciones:
+
+* ZREL_T016 -> Es donde se indica los usuarios que no tienen que aparecer en el selector de compradores o grupos de compras en la aplicación frontend.
+
+## Datos maestros SAP
+
+Dentro del menú de ámbito *ZREL_STRAG* esta la carpeta *Parametrozación->Datos maestros SAP* donde tenemos las siguientes transacciones:
+
+* ZREL_T023 -> Se indica los usuarios que recibirán notificaciones cuando los datos maestros se modifiquen. Se puede configurar para que solo se reciban errores. Esta pensado para poner usuarios del departamento de IT o de soporte para que tengan constancia.
+* ZREL_T026 -> Es donde se definen los sistemas donde se actualizarán los datos maestros en SAP. En esta tabla se indicará: 
+  * ID sistema
+  * RFC. La RFC debe tener usuario y contraseña en el sistema indicado. El motivo es que en el sistema donde se ejecuta la aplicación el cambio se hará con el usuario que aprueba el cambio. Pero ese usuario no tiene porque existir en el resto de sistema a actualiar.
+  * Tipo de sistema. La aplicación inicialmente aparte de cambiar el customizing de SAP tiene como objetivo cambiar roles en el CUA de SAP, por ello, tener el tipo de sistema permitirá saber a que RFC hay que llamar.
+  * Nivel. Si tenemos esta configuración de sistemas: DES -> INT -> PROD. El sistema DES será 1, INT el 2 y PROD el 3. Si la aplicación se ejecuta en INT el sistema actualizará los sistemas cuyo nivel sea inferior al suyo, en este caso sería DES (nivel 1).
+
+## Constantes
+
+Dentro del menú de ámbito *ZREL_STRAG* esta la carpeta *Parametrozación* tenemos la transacción ZREL_V001. En esta ransacción se definen constantes generales de la aplicación.
+
+# Utilidades
+
+Dentro del menú de ámbito *ZREL_STRAG* esta la carpeta *Utilidades* tenemos las siguientes transacción:
+
+* ZCA_R_TEMPLATE_MAIL -> Llama directamente al programa encargado de mantener los templates para el envio de correos.
+* ZREL_R_LNCH_UPD_MD -> Permite realizar la actualización de datos maestros en SAP a partir del ID de solicitud de cambio.
+* ZREL_R_LNCH_APR_REQ -> Permite realizar la aprobación de una solicitud de cambio. Este programa también permite lanzar de manera automática la actualización de datos maestros. 
