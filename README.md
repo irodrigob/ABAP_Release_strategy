@@ -35,7 +35,7 @@ Los grupos de compra se recuperan del usuario mirando:
 1. En que estrategias es aprobador
 2. En que grupos de compra esta asignado como comprador
 
-Un usuario podrá ver los grupos de compras asignados a un departamento, aunque no sea aprobador ni comprador, si esta asignado en una tabla de autorizaciones. Ya que la asignación de grupos de compras a departamentos/filiales se hace en una tabla a medida propia de la aplicación.
+Un usuario podrá ver los grupos de compras asignados a un departamento, aunque no sea aprobador ni comprador, si esta asignado en una tabla de autorizaciones. Ya que la asignación de grupos de compras a departamentos/filiales se hace en una tabla a medida propia de la aplicación. Una vez aprobado los cambios solicitados se actualizarán en SAP.
 
 # Funcionamiento general
 
@@ -46,7 +46,11 @@ Los pasos que realiza la aplicación al entrar son los siguientes:
   2. Mirar en la tabla de permisos para ver si al usuario se le habilitado permisos para algún departamentos o para todos.
 2. Una vez el usuario escoge el departamente en la aplicación se obtiene todo los grupos compras asociados a dicho departamento. Y de cada grupo de compras los datos de las estrategias.
 
-Una vez se solicitan los cambios estos son aprobadores por un responsable. Estos responsables se define en la tabla de autorizaciones que se verá más adelante.
+Una vez se solicitan los cambios estos son aprobadores por un responsable. Estos responsables se define en la tabla de autorizaciones que se verá más adelante. En todo el proceso de aprobación se enviará mail para: solicitud del cambio, aprobación o rechazo.
+
+Los cambios en las estrategias se sincronizan en todos los sistemas según el sistema donde este corriendo la aplicación. Es decir, tenemos la siguiente configuración: DES -> INT -> PROD.
+
+Si la actualización de datos se hace desde INT el customizing se modificará en INT y en DES. Si hiciese en PROD se replicará en los tres sistemas. Esto hace que desde un sistema intermedio no se modifique un sistema superior, como producción. 
 
 # Menú de la aplicación
 
@@ -64,13 +68,19 @@ Las estrategias se agrupan en grupos de compras y estos en departamentos. Para q
 
 1. Definir los departamentos
 2. Asociar los grupos de compras a departamentos
-3. Asociar los usuarios a los departamentos
-4. 
-Mediante la transacción ZREL_DEPARTAMENT, dentro del menú *ZREL_STRAG->Parametrización->Departmento/filiales* es donde se configurán los distintos departamentes y los grupos de compra:
+
+Mediante la transacción ZREL_DEPARTAMENT, dentro del menú *ZREL_STRAG->Parametrización->Departmento/filiales*, es donde se configurán los distintos departamentes y los grupos de compra:
 
 ![conf departamentos](https://github.com/irodrigob/ABAP_Release_strategy/blob/main/docs/conf_departamentos.png)
 ![conf departamentos2](https://github.com/irodrigob/ABAP_Release_strategy/blob/main/docs/conf_departamentos2.png)
 
 ## Autorizaciones de usuario
 
-Esta configuración es para aquellos usuarios que no son ni compradores ni aprobadores.
+Esta configuración permite dar permisos a usuarios que no son comopradores ni aprobadores, y sobretodo, quien serán los responsables de aprobador los cambios. Esta configuración se hace desde la transacción *ZREL_AUTH*, dentro del menú *ZREL_STRAG->Parametrización->Autorizaciones*:
+
+![conf autorizacion](https://github.com/irodrigob/ABAP_Release_strategy/blob/main/docs/conf_autorizaciones.png)
+
+En el primer nivel tenemos los roles que tiene la aplicación. Estos roles no pueden ser cambiados ya que afectaría al funcionamiento de la aplicación. Una vez seleccionado el segun nivel permite indicar los usuarios de dicho rol:
+
+![conf autorizacion2](https://github.com/irodrigob/ABAP_Release_strategy/blob/main/docs/conf_autorizaciones2.png)
+
