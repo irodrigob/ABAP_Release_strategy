@@ -37,16 +37,16 @@ Los grupos de compra se recuperan del usuario mirando:
 
 Un usuario podrá ver los grupos de compras asignados a un departamento, aunque no sea aprobador ni comprador, si esta asignado en una tabla de autorizaciones. Ya que la asignación de grupos de compras a departamentos/filiales se hace en una tabla a medida propia de la aplicación.
 
-# Funcionamiento
+# Funcionamiento general
 
 Los pasos que realiza la aplicación al entrar son los siguientes:
 
-1. Obtener los departamentos del usuario para ello:
-  2. Mira en que grupos de compras es comprador
-  3. Mira en que grupos de compra es aprobador 
-  4. 
-  
-4. De esos grupos se mira en que departamentos están asignados
+1. Mirar los departamentos del usuario. Para ello:
+  1. Se mira los grupos de compras donde el usuario es comprador o aprobador para determinar los departamentos.
+  2. Mirar en la tabla de permisos para ver si al usuario se le habilitado permisos para algún departamentos o para todos.
+2. Una vez el usuario escoge el departamente en la aplicación se obtiene todo los grupos compras asociados a dicho departamento. Y de cada grupo de compras los datos de las estrategias.
+
+Una vez se solicitan los cambios estos son aprobadores por un responsable. Estos responsables se define en la tabla de autorizaciones que se verá más adelante.
 
 # Menú de la aplicación
 
@@ -56,13 +56,21 @@ El menú principal de configuración es el *ZREL_STRAG* en esta menú se encontr
 
 # Configuración
 
+La aplicación dispone de una serie de transacciones para poderla configurar. La más importante es la que define los grupos de compras y departamentos, ya que sin ellos, la parte frontend no mostrará ningún dato.
+
+## Definir departamentos y grupos de compra
+
 Las estrategias se agrupan en grupos de compras y estos en departamentos. Para que la aplicación en frontend funcione hay que hacer los siguientes pasos:
 
 1. Definir los departamentos
 2. Asociar los grupos de compras a departamentos
 3. Asociar los usuarios a los departamentos
+4. 
+Mediante la transacción ZREL_DEPARTAMENT, dentro del menú *ZREL_STRAG->Parametrización->Departmento/filiales* es donde se configurán los distintos departamentes y los grupos de compra:
 
-Cosas que propias de cliente para el cual se ha desarrollado esta aplicación:
+![conf departamentos](https://github.com/irodrigob/ABAP_Release_strategy/blob/main/docs/conf_departamentos.png)
+![conf departamentos2](https://github.com/irodrigob/ABAP_Release_strategy/blob/main/docs/conf_departamentos2.png)
 
-* El cliente tiene una tabla Z donde 
+## Autorizaciones de usuario
 
+Esta configuración es para aquellos usuarios que no son ni compradores ni aprobadores.
