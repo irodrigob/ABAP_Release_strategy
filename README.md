@@ -29,6 +29,10 @@ Más que una dependencia es que hay un proceso importante en la aplicación que 
 
 El programa hace uso de la [utilidad de constantes](https://github.com/irodrigob/ABAP_Constants) para parametrizaciones generales de la aplicación. 
 
+## Utilidades del BOPF
+
+Hay que tener instalado las [utilidades NOPF](https://github.com/irodrigob/ABAP_BOPF_UTILS)
+
 # Definición y funcionamiento general
 
 ## Definición
