@@ -31,7 +31,7 @@ El programa hace uso de la [utilidad de constantes](https://github.com/irodrigob
 
 ## Utilidades del BOPF
 
-Hay que tener instalado las [utilidades NOPF](https://github.com/irodrigob/ABAP_BOPF_UTILS)
+Hay que tener instalado las [utilidades BOPF](https://github.com/irodrigob/ABAP_BOPF_UTILS)
 
 # Definición y funcionamiento general
 
