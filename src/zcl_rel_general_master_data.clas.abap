@@ -10,7 +10,6 @@ CLASS zcl_rel_general_master_data DEFINITION
              sys_level TYPE zrel_e_level,
            END OF ts_rfc_system.
     TYPES: tt_rfc_system TYPE STANDARD TABLE OF ts_rfc_system WITH DEFAULT KEY.
-
     "! <p class="shorttext synchronized">CONSTRUCTOR</p>
     "! @parameter iv_langu | <p class="shorttext synchronized">Idioma</p>
     METHODS constructor
@@ -56,14 +55,22 @@ CLASS zcl_rel_general_master_data IMPLEMENTATION.
     ENDIF.
 
 
-    SELECT a~bname AS username d~name_text AS username_desc INTO TABLE et_users
-           FROM ( usr02 AS a INNER JOIN usr21 AS b ON
-                b~bname = a~bname ) LEFT OUTER JOIN adrp AS d ON
-                                    d~persnumber = b~persnumber
-           WHERE a~bname IN lt_r_users
-                 AND a~ustyp = zif_rel_data=>cs_general_master_data-users-dialog_user
-                 AND ( a~gltgb >= sy-datum OR a~gltgb = '00000000' ).
+*    SELECT a~bname AS username d~name_text AS username_desc INTO TABLE et_users
+*           FROM ( usr02 AS a INNER JOIN usr21 AS b ON
+*                b~bname = a~bname ) LEFT OUTER JOIN adrp AS d ON
+*                                    d~persnumber = b~persnumber
+*           WHERE a~bname IN lt_r_users
+*                 AND a~ustyp = zif_rel_data=>cs_general_master_data-users-dialog_user
+*                 AND ( a~gltgb >= sy-datum OR a~gltgb = '00000000' ).
+    SELECT username, username_desc
+           FROM zrel_i_systems_user
+           WHERE username IN @lt_r_users
+                 AND ( gltgb >= @sy-datum OR gltgb = '00000000' )
+                 INTO TABLE @et_users.
 
+    LOOP AT et_users ASSIGNING FIELD-SYMBOL(<ls_users>).
+      <ls_users>-username_desc_search = |{ <ls_users>-username_desc CASE = UPPER }|.
+    ENDLOOP.
   ENDMETHOD.
 
   METHOD get_rfc_system.
@@ -79,5 +86,7 @@ CLASS zcl_rel_general_master_data IMPLEMENTATION.
            ORDER BY sys_level.
 
   ENDMETHOD.
+
+
 
 ENDCLASS.

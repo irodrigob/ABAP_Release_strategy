@@ -1,6 +1,12 @@
 *---------------------------------------------------------------------*
 *    view related data declarations
 *---------------------------------------------------------------------*
+*...processing: ZREL_T000.......................................*
+DATA:  BEGIN OF STATUS_ZREL_T000                     .   "state vector
+         INCLUDE STRUCTURE VIMSTATUS.
+DATA:  END OF STATUS_ZREL_T000                     .
+CONTROLS: TCTRL_ZREL_T000
+            TYPE TABLEVIEW USING SCREEN '0016'.
 *...processing: ZREL_T002.......................................*
 DATA:  BEGIN OF STATUS_ZREL_T002                     .   "state vector
          INCLUDE STRUCTURE VIMSTATUS.
@@ -152,6 +158,7 @@ INCLUDE STRUCTURE ZREL_V005.
 DATA: END OF ZREL_V005_TOTAL.
 
 *.........table declarations:.................................*
+TABLES: *ZREL_T000                     .
 TABLES: *ZREL_T002                     .
 TABLES: *ZREL_T002T                    .
 TABLES: *ZREL_T003                     .
@@ -166,6 +173,7 @@ TABLES: *ZREL_T024                     .
 TABLES: *ZREL_T025                     .
 TABLES: *ZREL_T026                     .
 TABLES: T024                           .
+TABLES: ZREL_T000                      .
 TABLES: ZREL_T002                      .
 TABLES: ZREL_T002T                     .
 TABLES: ZREL_T003                      .

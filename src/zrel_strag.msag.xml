@@ -242,6 +242,12 @@
      <MSGNR>038</MSGNR>
      <TEXT>máximo de 24 horas.</TEXT>
     </T100>
+    <T100>
+     <SPRSL>S</SPRSL>
+     <ARBGB>ZREL_STRAG</ARBGB>
+     <MSGNR>039</MSGNR>
+     <TEXT>Importe de la estratégia &amp; &amp; borrada correctamente</TEXT>
+    </T100>
    </T100>
   </asx:values>
  </asx:abap>

@@ -34,7 +34,8 @@ FUNCTION ZREL_UPDATE_SAP_CUSTO.
                                   iv_number     = '032'
                                   iv_langu      = iv_langu
                                   iv_message_v1 = sy-sysid
-                                  iv_message_v2 = 'T16FW' ) INTO TABLE et_return.
+                                  iv_message_v2 = 'T16FW'
+                                  iv_field = sy-sysid ) INTO TABLE et_return.
 
     ENDIF.
   ENDIF.
@@ -51,7 +52,8 @@ FUNCTION ZREL_UPDATE_SAP_CUSTO.
                                   iv_number     = '032'
                                   iv_langu      = iv_langu
                                   iv_message_v1 = sy-sysid
-                                  iv_message_v2 = 'T16FK' ) INTO TABLE et_return.
+                                  iv_message_v2 = 'T16FK'
+                                  iv_field = sy-sysid ) INTO TABLE et_return.
 
     ENDIF.
   ENDIF.
@@ -68,7 +70,8 @@ FUNCTION ZREL_UPDATE_SAP_CUSTO.
                                   iv_number     = '032'
                                   iv_langu      = iv_langu
                                   iv_message_v1 = sy-sysid
-                                  iv_message_v2 = 'T16FV' ) INTO TABLE et_return.
+                                  iv_message_v2 = 'T16FV'
+                                  iv_field = sy-sysid ) INTO TABLE et_return.
 
     ENDIF.
   ENDIF.
@@ -82,7 +85,8 @@ FUNCTION ZREL_UPDATE_SAP_CUSTO.
                                    iv_number     = '032'
                                    iv_langu      = iv_langu
                                    iv_message_v1 = sy-sysid
-                                   iv_message_v2 = 'T16FS' ) INTO TABLE et_return.
+                                   iv_message_v2 = 'T16FS'
+                                   iv_field = sy-sysid ) INTO TABLE et_return.
     ELSE.
 
       INSERT zcl_ca_utilities=>fill_return( iv_type       = zif_rel_data=>cs_msg-type_error
@@ -90,7 +94,8 @@ FUNCTION ZREL_UPDATE_SAP_CUSTO.
                                           iv_number     = '031'
                                           iv_langu      = iv_langu
                                           iv_message_v1 = sy-sysid
-                                          iv_message_v2 = 'T16FS' ) INTO TABLE et_return.
+                                          iv_message_v2 = 'T16FS'
+                                          iv_field = sy-sysid ) INTO TABLE et_return.
 
     ENDIF.
   ENDIF.
@@ -106,7 +111,8 @@ FUNCTION ZREL_UPDATE_SAP_CUSTO.
                                     iv_number     = '032'
                                     iv_langu      = iv_langu
                                     iv_message_v1 = sy-sysid
-                                    iv_message_v2 = 'T16FT' ) INTO TABLE et_return.
+                                    iv_message_v2 = 'T16FT'
+                                    iv_field = sy-sysid ) INTO TABLE et_return.
       ELSE.
 
         INSERT zcl_ca_utilities=>fill_return( iv_type       = zif_rel_data=>cs_msg-type_error
@@ -114,7 +120,8 @@ FUNCTION ZREL_UPDATE_SAP_CUSTO.
                                             iv_number     = '031'
                                             iv_langu      = iv_langu
                                             iv_message_v1 = sy-sysid
-                                            iv_message_v2 = 'T16FT' ) INTO TABLE et_return.
+                                            iv_message_v2 = 'T16FT'
+                                            iv_field = sy-sysid ) INTO TABLE et_return.
 
 
       ENDIF.
@@ -132,7 +139,8 @@ FUNCTION ZREL_UPDATE_SAP_CUSTO.
                                     iv_number     = '032'
                                     iv_langu      = iv_langu
                                     iv_message_v1 = sy-sysid
-                                    iv_message_v2 = 'T16FK' ) INTO TABLE et_return.
+                                    iv_message_v2 = 'T16FK'
+                                    iv_field = sy-sysid ) INTO TABLE et_return.
       ELSE.
 
         INSERT zcl_ca_utilities=>fill_return( iv_type       = zif_rel_data=>cs_msg-type_error
@@ -140,7 +148,8 @@ FUNCTION ZREL_UPDATE_SAP_CUSTO.
                                             iv_number     = '031'
                                             iv_langu      = iv_langu
                                             iv_message_v1 = sy-sysid
-                                            iv_message_v2 = 'T16FK' ) INTO TABLE et_return.
+                                            iv_message_v2 = 'T16FK'
+                                            iv_field = sy-sysid ) INTO TABLE et_return.
 
 
       ENDIF.
@@ -158,7 +167,8 @@ FUNCTION ZREL_UPDATE_SAP_CUSTO.
                                     iv_number     = '032'
                                     iv_langu      = iv_langu
                                     iv_message_v1 = sy-sysid
-                                    iv_message_v2 = 'T16FV' ) INTO TABLE et_return.
+                                    iv_message_v2 = 'T16FV'
+                                    iv_field = sy-sysid ) INTO TABLE et_return.
       ELSE.
 
         INSERT zcl_ca_utilities=>fill_return( iv_type       = zif_rel_data=>cs_msg-type_error
@@ -166,7 +176,8 @@ FUNCTION ZREL_UPDATE_SAP_CUSTO.
                                             iv_number     = '031'
                                             iv_langu      = iv_langu
                                             iv_message_v1 = sy-sysid
-                                            iv_message_v2 = 'T16FV' ) INTO TABLE et_return.
+                                            iv_message_v2 = 'T16FV'
+                                            iv_field = sy-sysid ) INTO TABLE et_return.
 
 
       ENDIF.
@@ -184,7 +195,8 @@ FUNCTION ZREL_UPDATE_SAP_CUSTO.
                                     iv_number     = '032'
                                     iv_langu      = iv_langu
                                     iv_message_v1 = sy-sysid
-                                    iv_message_v2 = 'T16FW' ) INTO TABLE et_return.
+                                    iv_message_v2 = 'T16FW'
+                                    iv_field = sy-sysid ) INTO TABLE et_return.
       ELSE.
 
         INSERT zcl_ca_utilities=>fill_return( iv_type       = zif_rel_data=>cs_msg-type_error
@@ -192,7 +204,8 @@ FUNCTION ZREL_UPDATE_SAP_CUSTO.
                                             iv_number     = '031'
                                             iv_langu      = iv_langu
                                             iv_message_v1 = sy-sysid
-                                            iv_message_v2 = 'T16FW' ) INTO TABLE et_return.
+                                            iv_message_v2 = 'T16FW'
+                                            iv_field = sy-sysid ) INTO TABLE et_return.
 
 
       ENDIF.
@@ -210,7 +223,8 @@ FUNCTION ZREL_UPDATE_SAP_CUSTO.
                                     iv_number     = '032'
                                     iv_langu      = iv_langu
                                     iv_message_v1 = sy-sysid
-                                    iv_message_v2 = 'T16FD' ) INTO TABLE et_return.
+                                    iv_message_v2 = 'T16FD'
+                                    iv_field = sy-sysid ) INTO TABLE et_return.
       ELSE.
 
         INSERT zcl_ca_utilities=>fill_return( iv_type       = zif_rel_data=>cs_msg-type_error
@@ -218,7 +232,8 @@ FUNCTION ZREL_UPDATE_SAP_CUSTO.
                                             iv_number     = '031'
                                             iv_langu      = iv_langu
                                             iv_message_v1 = sy-sysid
-                                            iv_message_v2 = 'T16FD' ) INTO TABLE et_return.
+                                            iv_message_v2 = 'T16FD'
+                                            iv_field = sy-sysid ) INTO TABLE et_return.
 
 
       ENDIF.
@@ -236,7 +251,8 @@ FUNCTION ZREL_UPDATE_SAP_CUSTO.
                                     iv_number     = '032'
                                     iv_langu      = iv_langu
                                     iv_message_v1 = sy-sysid
-                                    iv_message_v2 = 'T16FC' ) INTO TABLE et_return.
+                                    iv_message_v2 = 'T16FC'
+                                    iv_field = sy-sysid ) INTO TABLE et_return.
       ELSE.
 
         INSERT zcl_ca_utilities=>fill_return( iv_type       = zif_rel_data=>cs_msg-type_error
@@ -244,7 +260,8 @@ FUNCTION ZREL_UPDATE_SAP_CUSTO.
                                             iv_number     = '031'
                                             iv_langu      = iv_langu
                                             iv_message_v1 = sy-sysid
-                                            iv_message_v2 = 'T16FC' ) INTO TABLE et_return.
+                                            iv_message_v2 = 'T16FC'
+                                            iv_field = sy-sysid ) INTO TABLE et_return.
 
 
       ENDIF.

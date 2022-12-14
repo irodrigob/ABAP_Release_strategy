@@ -307,19 +307,55 @@ CLASS zcl_rel_utilities IMPLEMENTATION.
           OTHERS               = 4.
 
       " Ahora hay que mirar el tipo de relacion porque hay una, la de intervalos, que hay que procesarla de distinta manera.
-      IF iv_value_relation = zif_rel_data=>cs_strategy-classification-value_relation-between.
+      " Hay una excepción donde puede ser que un intervalo venga así: "> 300,00 - 2000,00 EUR". Esto hace que entre por el trozo
+      " de código del ELSE y se formatee los datos. Para solucionarlo voy a mirar si existe el signo "-" en el texto, si así, tengo
+      " un intervalo.
+      IF iv_value_relation = zif_rel_data=>cs_strategy-classification-value_relation-between
+         OR ev_value_formatted CS zif_rel_data=>cs_strategy-classification-charac_sep_relation.
+
+        " Si tengo un intervalo cuya relación no es de intervalo quito los dos primeros caracteres
+        " para que quede como si el value_relation fuese de intervalo.
+        IF iv_value_relation NE zif_rel_data=>cs_strategy-classification-value_relation-between.
+          ev_value_formatted = ev_value_formatted+2.
+        ENDIF.
+
         " El operando en este caso no lo devuelve la función así que le pongo el "-" para identificarlo
-        SPLIT ev_value_formatted AT space INTO: DATA(lv_amount1) ev_value_operand DATA(lv_amount2) ev_currency.
+        SPLIT ev_value_formatted AT space INTO: DATA(lv_amount1) DATA(lv_operand) DATA(lv_amount2) ev_currency.
 
         WRITE ev_value_amount_from CURRENCY ev_currency TO lv_amount_char LEFT-JUSTIFIED.
-        ev_value_formatted = |{ lv_amount_char } { ev_currency } { ev_value_operand }|.
+        ev_value_formatted = |{ lv_amount_char } { ev_currency } { zif_rel_data=>cs_strategy-classification-charac_sep_relation }|.
         WRITE ev_value_amount_to CURRENCY ev_currency TO lv_amount_char LEFT-JUSTIFIED.
         ev_value_formatted = |{ ev_value_formatted } { lv_amount_char } { ev_currency }|.
 
+        " Si el value relation es de intervalo paso el operando obtenido en el split. Si no lo es pongo que el operando es un intervalo porque
+        " en su momento se pondría un intervalo pero con el operando incorrecto. Esto hace que cuando se edita en la aplicación no se vean correctamente
+        " las cosas.
+        " Nota Iván: Puede forzar que siempre el operando sea el "-" de intervalor, pero dejo el IF porque esto ya ha sufrido varios cambios y que tener
+        " bien comentado el motivo.
+        IF iv_value_relation = zif_rel_data=>cs_strategy-classification-value_relation-between.
+          ev_value_operand = lv_operand.
+        ELSE.
+          ev_value_operand = zif_rel_data=>cs_strategy-classification-charac_sep_relation.
+          "ev_value_formatted = |{ ev_value_operand } { ev_value_formatted }|.
+        ENDIF.
+
       ELSE.
-        " El valor formateado lo troceo en tres partes porque lo que voy hacer es formatear el importe con separador de miles y decimales
-        " para que el usuario lo veo en su formato configurado.
-        SPLIT ev_value_formatted AT space INTO: DATA(lv_operand) DATA(lv_amount) ev_currency.
+
+        " El valor formateado lo troceo en una tabla. Si la tabla tiene 3 registros entonces tenemos el operando
+        " en primera posicion, importe en segunda y moneda en la tercera.
+        " Si solo tiene dos es que noviene operando, y el importe estará en la primera y moneda en la segunda.
+        " El segundo caso no debería de ocurrir, que no tenga operando, pero se controla para que se vea que no viene.
+        SPLIT ev_value_formatted AT space INTO TABLE DATA(lt_values).
+        DATA(lv_len) = lines( lt_values ).
+        CASE lv_len.
+          WHEN 3.
+            lv_operand = lt_values[ 1 ].
+            DATA(lv_amount) = lt_values[ 2 ].
+            ev_currency = lt_values[ 3 ].
+          WHEN 2.
+            lv_amount = lt_values[ 1 ].
+            ev_currency = lt_values[ 2 ].
+        ENDCASE.
 
         WRITE ev_value_amount_from CURRENCY ev_currency TO lv_amount_char LEFT-JUSTIFIED.
         ev_value_formatted = |{ lv_operand } { lv_amount_char } { ev_currency }|.
@@ -423,13 +459,13 @@ CLASS zcl_rel_utilities IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD conv_atinn_2_atnam.
-clear: rv_atnam.
+    CLEAR: rv_atnam.
 
-CALL FUNCTION 'CONVERSION_EXIT_ATINN_OUTPUT'
-        EXPORTING
-          input  = iv_atinn
-        IMPORTING
-          output = rv_atnam.
+    CALL FUNCTION 'CONVERSION_EXIT_ATINN_OUTPUT'
+      EXPORTING
+        input  = iv_atinn
+      IMPORTING
+        output = rv_atnam.
   ENDMETHOD.
 
 ENDCLASS.

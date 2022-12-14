@@ -1,7 +1,5 @@
 *---------------------------------------------------------------------*
 *    program for:   TABLEFRAME_ZREL_TBL
-*   generation date: 12.01.2022 at 18:12:14
-*   view maintenance generator version: #001407#
 *---------------------------------------------------------------------*
 FUNCTION TABLEFRAME_ZREL_TBL           .
 

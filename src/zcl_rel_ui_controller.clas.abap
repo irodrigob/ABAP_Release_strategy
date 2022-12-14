@@ -13,6 +13,12 @@ CLASS zcl_rel_ui_controller DEFINITION
       END OF ts_depart_subs .
     TYPES:
       tt_depart_subs TYPE STANDARD TABLE OF ts_depart_subs WITH EMPTY KEY .
+    TYPES: tt_filter_buyers TYPE STANDARD TABLE OF syuname WITH EMPTY KEY.
+    TYPES: tt_filter_approvers TYPE STANDARD TABLE OF syuname WITH EMPTY KEY.
+    TYPES: tt_filter_purchase_group TYPE STANDARD TABLE OF ekgrp WITH EMPTY KEY.
+    TYPES: tt_filter_liberation_group TYPE STANDARD TABLE OF frggr WITH EMPTY KEY.
+    TYPES: tt_filter_liberation_code TYPE STANDARD TABLE OF frgco WITH EMPTY KEY.
+
 
     "! <p class="shorttext synchronized">Devuelve la información del usuario</p>
     "! @parameter iv_user | <p class="shorttext synchronized">Usuario</p>
@@ -75,14 +81,14 @@ CLASS zcl_rel_ui_controller DEFINITION
     "! @parameter return | <p class="shorttext synchronized">Mensaje del proceso</p>
     CLASS-METHODS approve_request
       IMPORTING
-        !langu                  TYPE sy-langu DEFAULT sy-langu
-        !request_id             TYPE zrel_e_request_id
-        !action                 TYPE zrel_e_action_approv
-        !reason                 TYPE zrel_e_approval_reason OPTIONAL
+        !langu                      TYPE sy-langu DEFAULT sy-langu
+        !request_id                 TYPE zrel_e_request_id
+        !action                     TYPE zrel_e_action_approv
+        !reason                     TYPE zrel_e_approval_reason OPTIONAL
         !department_approver        TYPE syuname OPTIONAL
         !department_approver_reason TYPE string OPTIONAL
       EXPORTING
-        !return                 TYPE bapiret2_t .
+        !return                     TYPE bapiret2_t .
     "! <p class="shorttext synchronized">Obtiene los tipos de filtros configuración</p>
     "! @parameter langu | <p class="shorttext synchronized">Idioma</p>
     "! @parameter filters | <p class="shorttext synchronized">Filtros</p>
@@ -124,10 +130,40 @@ CLASS zcl_rel_ui_controller DEFINITION
       EXPORTING
                 return      TYPE bapiret2_t.
     "! <p class="shorttext synchronized">Obtiene el listado de grupos de liberación</p>
-    "! @parameter rt_list | <p class="shorttext synchronized">Listado</p>
+    "! @parameter langu | <p class="shorttext synchronized">Idioma</p>
+    "! @parameter list | <p class="shorttext synchronized">Listado</p>
     METHODS get_liberation_group_list
       IMPORTING !langu TYPE sy-langu DEFAULT sy-langu
       EXPORTING list   TYPE zcl_rel_strategy_md_query=>tt_liberation_group_list.
+    "! <p class="shorttext synchronized">Obtiene el listado de grupos de compra</p>
+    "! @parameter langu | <p class="shorttext synchronized">Idioma</p>
+    "! @parameter list | <p class="shorttext synchronized">Listado</p>
+    METHODS get_purchase_group_list
+      IMPORTING !langu TYPE sy-langu DEFAULT sy-langu
+      EXPORTING list   TYPE zcl_rel_strategy_md_query=>tt_purchase_group_list.
+    "! <p class="shorttext synchronized">Obtiene el listado de códigos de liberación</p>
+    "! @parameter langu | <p class="shorttext synchronized">Idioma</p>
+    "! @parameter list | <p class="shorttext synchronized">Listado</p>
+    METHODS get_code_liberation_list
+      IMPORTING !langu TYPE sy-langu DEFAULT sy-langu
+      EXPORTING list   TYPE zcl_rel_strategy_md_query=>tt_code_liberation_list.
+    "! <p class="shorttext synchronized">Búsqueda de estrategias por multiples campos</p>
+    "! @parameter langu | <p class="shorttext synchronized">Idioma</p>
+    "! @parameter buyers | <p class="shorttext synchronized">Compradores</p>
+    "! @parameter approvers | <p class="shorttext synchronized">Aprobadores</p>
+    "! @parameter purchase_group | <p class="shorttext synchronized">Grupos de compra</p>
+    "! @parameter liberation_code | <p class="shorttext synchronized">Códigos de liberación</p>
+    METHODS search_multiple_values
+      IMPORTING langu            TYPE sy-langu DEFAULT sy-langu
+                buyers           TYPE tt_filter_buyers OPTIONAL
+                approvers        TYPE tt_filter_approvers OPTIONAL
+                purchase_group   TYPE tt_filter_purchase_group OPTIONAL
+                liberation_group_code   TYPE zcl_rel_strategy_md_query=>tt_filter_liberation_code OPTIONAL
+                liberation_group TYPE tt_filter_liberation_group OPTIONAL
+                liberation_code  TYPE tt_filter_liberation_code OPTIONAL
+      EXPORTING
+                !strategy_data   TYPE zif_rel_data=>tt_pgroup_all_data .
+
   PROTECTED SECTION.
     "! <p class="shorttext synchronized">Transfiere la solicitud de strategia al modelo de estrategia</p>
     "! Este metodo transfiere el modelo de estrategias de una solicitud de cambio al modelo de salida
@@ -376,6 +412,75 @@ CLASS zcl_rel_ui_controller IMPLEMENTATION.
   METHOD get_liberation_group_list.
 
     list = NEW zcl_rel_strategy_md_query( iv_langu = langu )->get_liberation_group_list(  ).
+
+  ENDMETHOD.
+
+  METHOD get_purchase_group_list.
+    list = NEW zcl_rel_strategy_md_query( iv_langu = langu )->get_purchase_group_list(  ).
+  ENDMETHOD.
+
+  METHOD get_code_liberation_list.
+    list = NEW zcl_rel_strategy_md_query( iv_langu = langu )->get_code_liberation_list(  ).
+  ENDMETHOD.
+
+  METHOD search_multiple_values.
+
+    DATA(lo_md_query) = NEW zcl_rel_strategy_md_query( iv_langu = langu ).
+    DATA(lo_request_data) = NEW zcl_rel_strategy_chnge_request( iv_langu = langu ).
+
+
+    DATA(lt_r_buyers) = VALUE zif_rel_data=>tt_r_username( FOR <wa> IN buyers ( sign = 'I' option = 'EQ' low = <wa> ) ).
+    DATA(lt_r_approvers) = VALUE zif_rel_data=>tt_r_username( FOR <wa1> IN approvers ( sign = 'I' option = 'EQ' low = <wa1> ) ).
+    DATA(lt_r_purchase_group) = VALUE zif_rel_data=>tt_r_purchase_group( FOR <wa2> IN purchase_group ( sign = 'I' option = 'EQ' low = <wa2> ) ).
+    DATA(lt_r_liberation_group) = VALUE zif_rel_data=>tt_r_liberation_group( FOR <wa5> IN liberation_group ( sign = 'I' option = 'EQ' low = <wa5> ) ).
+    DATA(lt_r_liberation_code) = VALUE zif_rel_data=>tt_r_liberation_code( FOR <wa6> IN liberation_code ( sign = 'I' option = 'EQ' low = <wa6> ) ).
+
+    lo_md_query->search_multiple_values(
+      EXPORTING
+        it_r_buyers         = lt_r_buyers
+        it_r_approvers      = lt_r_approvers
+        it_r_purchase_group = lt_r_purchase_group
+        it_group_code_lib = liberation_group_code
+        it_r_group = lt_r_liberation_group
+        it_r_code = lt_r_liberation_code
+      IMPORTING
+        et_strategy_data    = DATA(lt_strategy_md_data)
+        et_buyer_purchase_group = DATA(lt_buyer_purchase_group)
+        et_purchase_group = DATA(lt_purchase_group) ).
+
+    IF lt_purchase_group IS NOT INITIAL.
+
+      " Datos de las peticiones de cambios pendientes de aprobar para los grupos de compra
+      lo_request_data->get_pgroup_request_data( EXPORTING it_r_pgroup     = VALUE #( FOR <wa3> IN lt_purchase_group ( sign = 'I' option = 'EQ' low = <wa3>-purchase_group ) )
+                                                          it_r_status = VALUE #( ( sign = 'I' option = 'EQ' low = zif_rel_data=>cs_strategy-change_request-approvals-request_status-pending ) )
+                                                 IMPORTING et_request_data = DATA(lt_request_data) ).
+
+      LOOP AT lt_purchase_group ASSIGNING FIELD-SYMBOL(<ls_purchase_group>).
+        INSERT CORRESPONDING #( <ls_purchase_group> ) INTO TABLE strategy_data ASSIGNING FIELD-SYMBOL(<ls_strategy_data>).
+
+        " Compradores actuales
+        <ls_strategy_data>-buyers = VALUE #( FOR <wa4> IN lt_buyer_purchase_group
+                                             WHERE ( purchase_group = <ls_purchase_group>-purchase_group )
+                                                   ( username = <wa4>-username
+                                                     username_desc = <wa4>-username_desc ) ).
+        READ TABLE lt_strategy_md_data ASSIGNING FIELD-SYMBOL(<ls_strategy_md_data>)
+                                    WITH KEY purchase_group = <ls_purchase_group>-purchase_group.
+        IF sy-subrc = 0.
+          <ls_strategy_data>-strategies = <ls_strategy_md_data>-strategies.
+        ENDIF.
+
+        " Se informa los datos solicitados, si los hubiese.
+        READ TABLE lt_request_data ASSIGNING FIELD-SYMBOL(<ls_request_data>) WITH KEY purchase_group = <ls_purchase_group>-purchase_group.
+        IF sy-subrc = 0.
+          " Debido a los campos complejos no es posible hacer un corresponding.
+          zcl_rel_utilities=>transfer_req_data_2_strag_data( EXPORTING is_request_data = <ls_request_data>
+                                          CHANGING cs_strategy_data = <ls_strategy_data> ).
+        ENDIF.
+
+
+      ENDLOOP.
+
+    ENDIF.
 
   ENDMETHOD.
 

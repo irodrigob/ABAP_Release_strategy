@@ -24,12 +24,12 @@ CLASS zcl_rel_strategy_md_crud DEFINITION
         ev_master_data_updated TYPE sap_bool.
   PROTECTED SECTION.
     TYPES: BEGIN OF ts_process_buyers.
-        INCLUDE TYPE zrel_bo_sp_strategy_buyers.
-    TYPES: END OF ts_process_buyers.
+             INCLUDE TYPE zrel_bo_sp_strategy_buyers.
+           TYPES: END OF ts_process_buyers.
     TYPES: tt_process_buyers TYPE STANDARD TABLE OF ts_process_buyers WITH EMPTY KEY.
     TYPES: BEGIN OF ts_process_amount.
-        INCLUDE TYPE zrel_bo_sp_strategy_amount.
-    TYPES: END OF ts_process_amount.
+             INCLUDE TYPE zrel_bo_sp_strategy_amount.
+           TYPES: END OF ts_process_amount.
     TYPES: tt_process_amount TYPE STANDARD TABLE OF ts_process_amount WITH EMPTY KEY.
     TYPES: BEGIN OF ts_global_options,
              commit TYPE sap_bool,
@@ -89,6 +89,8 @@ CLASS zcl_rel_strategy_md_crud DEFINITION
     DATA mv_klart_obtab TYPE tabelle.
     DATA mt_lib_group_of_user TYPE zcl_rel_strategy_md_query=>tt_user_lib_group .
     DATA mt_users_from_lib_group TYPE zcl_rel_strategy_md_query=>tt_user_lib_group .
+    DATA mv_langu_texto_baja TYPE sylangu.
+    DATA mv_texto_baja TYPE frgxt.
 
     "! <p class="shorttext synchronized">Proceso de actualización de compradores</p>
     "! @parameter et_return | <p class="shorttext synchronized">Retorno del proceso</p>
@@ -174,12 +176,14 @@ CLASS zcl_rel_strategy_md_crud DEFINITION
     "! @parameter iv_group | <p class="shorttext synchronized">Grupo libreación</p>
     "! @parameter iv_strategy | <p class="shorttext synchronized">Estrategia liberación</p>
     "! @parameter iv_level | <p class="shorttext synchronized">Nivel</p>
+    "! @parameter iv_text | <p class="shorttext synchronized">Texto</p>
     "! @parameter et_values | <p class="shorttext synchronized">Retorno del proceso</p>
     METHODS build_text_t16ft
       IMPORTING
                 iv_group         TYPE zrel_bo_sc_strategy_amount-group
                 iv_strategy      TYPE zrel_bo_sc_strategy_amount-strategy
-                iv_level         TYPE zrel_e_level
+                iv_level         TYPE zrel_e_level OPTIONAL
+                iv_text          TYPE frgxt  OPTIONAL
       RETURNING VALUE(rt_values) TYPE zrel_i_t16ft.
     "! <p class="shorttext synchronized">Determina el grupo y estrategia que se creará</p>
     "! @parameter et_return | <p class="shorttext synchronized">Resultado del proceso</p>
@@ -291,10 +295,10 @@ CLASS zcl_rel_strategy_md_crud DEFINITION
         ev_code     TYPE frgco
         et_return   TYPE bapiret2_t.
     "! <p class="shorttext synchronized">Rellena el borrado del usuario en todos sus grupos</p>
-    "! @parameter iv_username | <p class="shorttext synchronized">Usuarios</p>
+    "! @parameter is_old_approver | <p class="shorttext synchronized">Datos de aprobación</p>
     METHODS fill_del_user_groups
       IMPORTING
-        iv_username TYPE zrel_bo_sc_strategy_approvers-username.
+        is_old_approver TYPE zrel_bo_sc_strategy_apprv_sap .
     "! <p class="shorttext synchronized">Rellena el reemplazo de un usuario de todos los grupos</p>
     "! @parameter is_old_approver | <p class="shorttext synchronized">Antiguo aprobador</p>
     "! @parameter iv_new_approver | <p class="shorttext synchronized">Nuevo aprobador</p>
@@ -304,6 +308,21 @@ CLASS zcl_rel_strategy_md_crud DEFINITION
         is_new_approver TYPE zrel_bo_sc_strategy_approvers.
     "! <p class="shorttext synchronized">Construye los estados de liberación</p>
     METHODS build_liberation_statuses.
+    "! <p class="shorttext synchronized">Ajuste T16FS para eliminar los aprobadores borrados</p>
+    "! @parameter cs_t16fs | <p class="shorttext synchronized">Estructura T16FS</p>
+    METHODS delete_approvers_t16fs
+      CHANGING
+        cs_t16fs TYPE t16fs.
+    "! <p class="shorttext synchronized">Borra un importe</p>
+    "! @parameter cs_amount | <p class="shorttext synchronized">Importe</p>
+    "! @parameter et_return | <p class="shorttext synchronized">Retorno del proceso</p>
+    METHODS delete_amount
+      IMPORTING
+        is_amount TYPE zrel_bo_sc_strategy_amount
+      EXPORTING
+        et_return TYPE bapiret2_t.
+    "! <p class="shorttext synchronized">Lectura de constantes</p>
+    METHODS read_constants.
   PRIVATE SECTION.
 ENDCLASS.
 
@@ -319,6 +338,8 @@ CLASS zcl_rel_strategy_md_crud IMPLEMENTATION.
 
     " Inicialización de variables del BOPF
     init_bopf(  ).
+
+    read_constants(  ).
 
   ENDMETHOD.
 
@@ -490,6 +511,11 @@ CLASS zcl_rel_strategy_md_crud IMPLEMENTATION.
 
             INSERT LINES OF lt_return_insert  INTO TABLE et_return.
 
+          ELSEIF <ls_amount>-cdchngind = zif_rel_data=>cs_strategy-change_request-change_indicator-delete.
+            delete_amount(  EXPORTING is_amount = <ls_amount>
+                                       IMPORTING et_return = DATA(lt_return_delete) ).
+
+            INSERT LINES OF lt_return_delete  INTO TABLE et_return.
           ENDIF.
 
         ENDLOOP.
@@ -1092,7 +1118,9 @@ CLASS zcl_rel_strategy_md_crud IMPLEMENTATION.
     ENDIF.
 
     " Construyo el texto
-    DATA(lv_text) = |{ mt_pgroup[ 1 ]-purchase_group_desc  } { iv_level }|.
+    DATA(lv_text) = COND #( WHEN iv_text IS INITIAL
+                     THEN |{ mt_pgroup[ 1 ]-purchase_group_desc  } { iv_level }|
+                     ELSE iv_text ).
     rt_values = VALUE #( FOR <wa> IN lt_langu ( frggr = iv_group
                                     frgsx = iv_strategy
                                     spras = <wa>
@@ -1123,10 +1151,13 @@ CLASS zcl_rel_strategy_md_crud IMPLEMENTATION.
       process_update_custo_sap( IMPORTING et_return = et_return ).
     ENDIF.
 
-    " Si no hay error en el proceso de customizing vamos actualizar los importes si se han modificado.
-    IF NOT line_exists( et_return[ type = zif_rel_data=>cs_msg-type_error ] )
+    " Si no hay error en el proceso de customizing tanto en el entorno de desarrollo como en el sistema donde estoy, y hay cambios de importes
+    " entonces actualizo los importes.
+    IF NOT line_exists( et_return[ type = zif_rel_data=>cs_msg-type_error field = sy-sysid ] )
+       AND NOT line_exists( et_return[ type = zif_rel_data=>cs_msg-type_error field = zif_rel_data=>cs_connectivity-r3_systems-development ] )
        AND ( line_exists( mt_amounts[ cdchngind = zif_rel_data=>cs_strategy-change_request-change_indicator-insert ] )
-             OR line_exists( mt_amounts[ cdchngind = zif_rel_data=>cs_strategy-change_request-change_indicator-update ] ) ).
+             OR line_exists( mt_amounts[ cdchngind = zif_rel_data=>cs_strategy-change_request-change_indicator-update ] )
+             OR line_exists( mt_amounts[ cdchngind = zif_rel_data=>cs_strategy-change_request-change_indicator-delete ] ) ).
 
       process_amounts( IMPORTING et_return = DATA(lt_return_amount) ).
       INSERT LINES OF lt_return_amount INTO TABLE et_return.
@@ -1196,7 +1227,6 @@ CLASS zcl_rel_strategy_md_crud IMPLEMENTATION.
 
 
   METHOD build_custo_base_t16fs.
-    DATA lv_langu_texto_baja TYPE sylangu.
 
     CLEAR: et_return.
 
@@ -1218,9 +1248,6 @@ CLASS zcl_rel_strategy_md_crud IMPLEMENTATION.
     " Si con todo no hay grupo lanzo un error.
     IF lv_group IS NOT INITIAL.
 
-      zcl_rel_constants=>obtener_constantes( EXPORTING iv_constant = 'LANGU_TEXTO_BAJA'
-                                                IMPORTING ev_value    = lv_langu_texto_baja ).
-
       " Saco las combinaciones de grupo y estrategia donde se han modificado aprobadores
       DATA(lt_comb_group) = VALUE tt_comb_group_strat( FOR <wa1> IN mt_approvers WHERE ( cdchngind IS NOT INITIAL ) ( group = <wa1>-group
                                                                                                                       strategy = <wa1>-strategy )  ).
@@ -1235,7 +1262,7 @@ CLASS zcl_rel_strategy_md_crud IMPLEMENTATION.
         " Primero vamos a leer las estrategias asociadas al grupo
         IF mt_t16fs IS INITIAL.
           mt_t16fs = mo_md_query->get_strategys_from_group( EXPORTING iv_group = lv_group
-                                                                      iv_langu = lv_langu_texto_baja ).
+                                                                      iv_langu = mv_langu_texto_baja ).
         ENDIF.
 
         " Como el customizing se actualiza en varios sistema puede llegar a ocurrir que en el sistema que se lanza, ejemplo APT,
@@ -1250,11 +1277,24 @@ CLASS zcl_rel_strategy_md_crud IMPLEMENTATION.
 
           INSERT CORRESPONDING #( <ls_t16fs> ) INTO TABLE mt_t16fs_update ASSIGNING FIELD-SYMBOL(<ls_t16fs_update>).
 
-          " Si el importe es nuevo voy a resetear los aprobadores porque pueden ser que el codigo sea reutilice porque estaba de baja.
-          " Aquí de nuevo lo hacemos por el tema de reprocesos, Ya que puede ser que la actualización del custo haya fallado y no se haya grabado
-          " el reset de aprobadores y tenga que volver a reprocesar.
+          " Si el importe es nuevo voy a resetear los aprobadores porque pueden ser que el codigo se reutilice porque estaba de baja.
+          " Aquí de nuevo lo hacemos por el tema de reprocesos, Ya que puede ser que la actualización del custo haya fallado y no se haya grabado.
+          " Por ello mejor el reset de aprobadores y tenga que volver a reprocesar.
           IF <ls_amounts>-cdchngind = zif_rel_data=>cs_strategy-change_request-change_indicator-insert.
             reset_approvers_t16fs( CHANGING cs_t16fs = <ls_t16fs_update> ).
+
+            " Miro si a nivel de aprobador hay alguno borrado, ya que si existe hay que ajustar los códigos de liberacion
+          ELSEIF line_exists( mt_approvers[ group = <ls_comb_group>-group
+                                            strategy = <ls_comb_group>-strategy
+                                            cdchngind = zif_rel_data=>cs_strategy-change_request-change_indicator-delete ] ).
+            delete_approvers_t16fs( CHANGING cs_t16fs = <ls_t16fs_update> ).
+
+            INSERT LINES OF build_text_t16ft(
+            EXPORTING
+              iv_group    = <ls_comb_group>-group
+              iv_strategy = <ls_comb_group>-strategy
+              iv_text = mv_texto_baja ) INTO TABLE mt_t16ft_update.
+
           ENDIF.
 
         ELSE.
@@ -1265,50 +1305,50 @@ CLASS zcl_rel_strategy_md_crud IMPLEMENTATION.
                           group_created = lv_group
                           level = <ls_amounts>-level ) INTO TABLE mt_strag_code_new_created.
         ENDIF.
+      ENDLOOP.
 
-        " Miro la tabla donde tengo las estrategias a crear y equivalencia final para si tengo que crear o determinar nuevas estrategias
-        IF mt_strag_code_new_created IS NOT INITIAL.
-          determine_new_strategy( EXPORTING iv_group = lv_group
-                                  IMPORTING et_return = DATA(lt_return_new_strag) ).
+      " Miro la tabla donde tengo las estrategias a crear y equivalencia final para si tengo que crear o determinar nuevas estrategias
+      IF mt_strag_code_new_created IS NOT INITIAL.
+        determine_new_strategy( EXPORTING iv_group = lv_group
+                                IMPORTING et_return = DATA(lt_return_new_strag) ).
 
-          IF lt_return_new_strag IS INITIAL.
-            " Recorro la tabla con las estrategias para:
-            " 1) Añadir los registros en la tabla que actualizará la T16FS
-            " 2) Añadir si la estrategia es reaprovechada la actualización de los textos en la tabla T16FT
-            " 3) Actualizar el modelo interno para poner los nuevos valores.
-            LOOP AT mt_strag_code_new_created ASSIGNING FIELD-SYMBOL(<ls_strag_code_new>).
-              INSERT VALUE #( frggr = <ls_strag_code_new>-group_created
-                              frgsx = <ls_strag_code_new>-strategy_created ) INTO TABLE mt_t16fs_update.
+        IF lt_return_new_strag IS INITIAL.
+          " Recorro la tabla con las estrategias para:
+          " 1) Añadir los registros en la tabla que actualizará la T16FS
+          " 2) Añadir si la estrategia es reaprovechada la actualización de los textos en la tabla T16FT
+          " 3) Actualizar el modelo interno para poner los nuevos valores.
+          LOOP AT mt_strag_code_new_created ASSIGNING FIELD-SYMBOL(<ls_strag_code_new>).
+            INSERT VALUE #( frggr = <ls_strag_code_new>-group_created
+                            frgsx = <ls_strag_code_new>-strategy_created ) INTO TABLE mt_t16fs_update.
 
-              " Añado los textos que deberá de tener la estrategía de liberación. Para los estrategias que se reutilicen se
-              " sobreescribirá el que ya tenga.
-              INSERT LINES OF build_text_t16ft(
-                EXPORTING
-                  iv_group    = <ls_strag_code_new>-group_created
-                  iv_strategy = <ls_strag_code_new>-strategy_created
-                  iv_level    = <ls_strag_code_new>-level ) INTO TABLE mt_t16ft_update.
+            " Añado los textos que deberá de tener la estrategía de liberación. Para los estrategias que se reutilicen se
+            " sobreescribirá el que ya tenga.
+            INSERT LINES OF build_text_t16ft(
+              EXPORTING
+                iv_group    = <ls_strag_code_new>-group_created
+                iv_strategy = <ls_strag_code_new>-strategy_created
+                iv_level    = <ls_strag_code_new>-level ) INTO TABLE mt_t16ft_update.
 
-              " Los importes
-              ASSIGN mt_amounts[ group = <ls_strag_code_new>-group strategy = <ls_strag_code_new>-strategy ] TO <ls_amounts>.
-              IF sy-subrc = 0.
-                <ls_amounts>-group = <ls_strag_code_new>-group_created.
-                <ls_amounts>-strategy = <ls_strag_code_new>-strategy_created.
-              ENDIF.
+            " Los importes
+            ASSIGN mt_amounts[ group = <ls_strag_code_new>-group strategy = <ls_strag_code_new>-strategy ] TO <ls_amounts>.
+            IF sy-subrc = 0.
+              <ls_amounts>-group = <ls_strag_code_new>-group_created.
+              <ls_amounts>-strategy = <ls_strag_code_new>-strategy_created.
+            ENDIF.
 
-              " Los aprobadores
-              LOOP AT mt_approvers ASSIGNING <ls_approvers> WHERE group = <ls_strag_code_new>-group
-                                                                  AND strategy = <ls_strag_code_new>-strategy.
-                <ls_approvers>-group = <ls_strag_code_new>-group_created.
-                <ls_approvers>-strategy = <ls_strag_code_new>-strategy_created.
-              ENDLOOP.
-
+            " Los aprobadores
+            LOOP AT mt_approvers ASSIGNING <ls_approvers> WHERE group = <ls_strag_code_new>-group
+                                                                AND strategy = <ls_strag_code_new>-strategy.
+              <ls_approvers>-group = <ls_strag_code_new>-group_created.
+              <ls_approvers>-strategy = <ls_strag_code_new>-strategy_created.
             ENDLOOP.
-          ENDIF.
 
-          INSERT LINES OF lt_return_new_strag INTO TABLE et_return.
+          ENDLOOP.
         ENDIF.
 
-      ENDLOOP.
+        INSERT LINES OF lt_return_new_strag INTO TABLE et_return.
+      ENDIF.
+
 
     ELSE.
       INSERT zcl_ca_utilities=>fill_return( iv_type       = zif_rel_data=>cs_msg-type_error
@@ -1323,14 +1363,12 @@ CLASS zcl_rel_strategy_md_crud IMPLEMENTATION.
 
 
   METHOD search_free_block_strategies.
-    DATA lv_texto_baja TYPE frgxt.
+
 
     CLEAR: et_blocks.
 
     " Vamos a sacar de la contaste el texto que se pone a la estrategía que se dan de baja y se puede reaprovechar.
 
-    zcl_rel_constants=>obtener_constantes( EXPORTING iv_constant = 'CUSTO_TEXTO_BAJA'
-                                           IMPORTING ev_value    = lv_texto_baja ).
 
     " El valor a partir del cual se buscará se pasa una variable para ir poder incrementado en uno
     " su valor.
@@ -1347,7 +1385,7 @@ CLASS zcl_rel_strategy_md_crud IMPLEMENTATION.
           INSERT VALUE #( strategy = <ls_comb>-value
                           reused = abap_false ) INTO TABLE et_blocks.
         ELSE.
-          IF <ls_t16fs>-frgxt = lv_texto_baja.
+          IF <ls_t16fs>-frgxt = mv_texto_baja.
             INSERT VALUE #( strategy = <ls_comb>-value
                             reused = abap_true ) INTO TABLE et_blocks.
           ELSE.
@@ -1389,7 +1427,7 @@ CLASS zcl_rel_strategy_md_crud IMPLEMENTATION.
       IF iv_block_contiguos = abap_true.
         search_free_block_strategies(
           EXPORTING
-            iv_from_tabix = ( lv_next_tabix + 1 )
+            iv_from_tabix = lv_next_tabix
             iv_size_block = iv_size_block
             iv_block_contiguos = iv_block_contiguos
           IMPORTING
@@ -1402,7 +1440,10 @@ CLASS zcl_rel_strategy_md_crud IMPLEMENTATION.
 
   METHOD save_custo_sap_bo.
     DATA lt_return_rfc TYPE bapiret2_t.
+    DATA lt_return_prod TYPE bapiret2_t.
+    DATA lt_return_int TYPE bapiret2_t.
     DATA: lv_msgtxt TYPE msgtxt.
+    DATA lv_no_update_dev TYPE sap_bool.
 
     CLEAR: et_return.
 
@@ -1414,76 +1455,174 @@ CLASS zcl_rel_strategy_md_crud IMPLEMENTATION.
     " nivel 2, GPI, y 1, GPD. De esta manera nunca actualizaré APT si estoy en producción.
     " Si por cualquier motivo no esta la entrada añado una manualmente y con nivel 1. Para que solo actualize el sistema donde estoy y no actualice otros
     " sistemas y la lie.
-    ASSIGN lt_rfc[ sysid = sy-sysid ] TO FIELD-SYMBOL(<ls_rfc_sysid>).
-    IF sy-subrc NE 0.
-      INSERT VALUE #( sysid = sy-sysid  sys_level = 1 ) INTO TABLE lt_rfc ASSIGNING <ls_rfc_sysid>.
-    ENDIF.
 
-    " En el sistema actual se actualiza el custo pero sin hacer commit work, el motivo es que en el siguiente paso se grabará los datos en el BOPF y será en ese momento
-    " se haga el commit.
-    CALL FUNCTION 'ZREL_UPDATE_SAP_CUSTO'
-      EXPORTING
-        it_t16fs        = mt_t16fs_update
-        it_t16ft        = mt_t16ft_update
-        it_t16fk        = mt_t16fk_update
-        it_t16fv        = mt_t16fv_update
-        it_t16fw        = mt_t16fw_update
-        it_t16fd        = mt_t16fd_update
-        it_t16fc        = mt_t16fc_update
-        it_t16fk_delete = mt_t16fk_delete
-        it_t16fv_delete = mt_t16fv_delete
-        it_t16fw_delete = mt_t16fw_delete
-        iv_commit       = abap_false
-        iv_langu        = mv_langu
-      IMPORTING
-        et_return       = et_return.
+    " Nota IRB: Leo un parámetro para que no actualice el sistema de desarrollo. Es para uso de pruebas.
+    zcl_rel_constants=>obtener_constantes( EXPORTING iv_constant = 'CRUD_NO_UPDATE_DEV'
+                                           IMPORTING ev_value = lv_no_update_dev ).
 
-    " Si hay un error hago un rollback del proceso
-    IF line_exists( et_return[ type = zif_rel_data=>cs_msg-type_error ] ).
-      ROLLBACK WORK.
-    ELSE.
-
-      " Ahora lanzamos el proceso de actualizar el nodo de los importes y aprobadores.
-      update_bopf_node_amounts(  ).
-      update_bopf_node_approvers(  ).
-
-      " Se graban, se hace el commit, los datos en el BOPF y de paso los datos en el customizing de SAP
-      mo_bopf_helper->save_data_bopf(  ).
-
-      " Ahora se leen los sistemas inferiores al actuales y que tenga RFC informado
-      LOOP AT lt_rfc ASSIGNING FIELD-SYMBOL(<ls_rfc>) WHERE sysid NE <ls_rfc_sysid>-sysid
-                                                            AND sys_level < <ls_rfc_sysid>-sys_level
-                                                            AND rfc IS NOT INITIAL.
-
-        CLEAR: lv_msgtxt.
-        CALL FUNCTION 'ZREL_UPDATE_SAP_CUSTO' DESTINATION <ls_rfc>-rfc
+    IF lv_no_update_dev = abap_false.
+      " Primero voy actualizar el sistema de desarrollo que es donde tiene que estar si o si.
+      IF sy-sysid = zif_rel_data=>cs_connectivity-r3_systems-development.
+        CALL FUNCTION 'ZREL_UPDATE_SAP_CUSTO'
           EXPORTING
-            it_t16fs              = mt_t16fs_update
-            it_t16ft              = mt_t16ft_update
-            iv_commit             = abap_true
-            iv_langu              = mv_langu
+            it_t16fs        = mt_t16fs_update
+            it_t16ft        = mt_t16ft_update
+            it_t16fk        = mt_t16fk_update
+            it_t16fv        = mt_t16fv_update
+            it_t16fw        = mt_t16fw_update
+            it_t16fd        = mt_t16fd_update
+            it_t16fc        = mt_t16fc_update
+            it_t16fk_delete = mt_t16fk_delete
+            it_t16fv_delete = mt_t16fv_delete
+            it_t16fw_delete = mt_t16fw_delete
+            iv_commit       = abap_false
+            iv_langu        = mv_langu
           IMPORTING
-            et_return             = lt_return_rfc
-          EXCEPTIONS
-            communication_failure = 1 MESSAGE lv_msgtxt
-            system_failure        = 2 MESSAGE lv_msgtxt
-            OTHERS                = 99.
-        IF sy-subrc = 0.
+            et_return       = et_return.
 
-          INSERT LINES OF lt_return_rfc INTO TABLE et_return.
-          CLEAR lt_return_rfc.
+      ELSE.
+        TRY.
+            ASSIGN lt_rfc[ sysid = zif_rel_data=>cs_connectivity-r3_systems-development ] TO FIELD-SYMBOL(<ls_rfc_develop>).
+            IF sy-subrc = 0.
+              CALL FUNCTION 'ZREL_UPDATE_SAP_CUSTO' DESTINATION <ls_rfc_develop>-rfc
+                EXPORTING
+                  it_t16fs              = mt_t16fs_update
+                  it_t16ft              = mt_t16ft_update
+                  it_t16fk              = mt_t16fk_update
+                  it_t16fv              = mt_t16fv_update
+                  it_t16fw              = mt_t16fw_update
+                  it_t16fd              = mt_t16fd_update
+                  it_t16fc              = mt_t16fc_update
+                  it_t16fk_delete       = mt_t16fk_delete
+                  it_t16fv_delete       = mt_t16fv_delete
+                  it_t16fw_delete       = mt_t16fw_delete
+                  iv_commit             = abap_false
+                  iv_langu              = mv_langu
+                IMPORTING
+                  et_return             = et_return
+                EXCEPTIONS
+                  communication_failure = 1 MESSAGE lv_msgtxt
+                  system_failure        = 2 MESSAGE lv_msgtxt
+                  OTHERS                = 99.
 
-        ELSE.
-          INSERT zcl_ca_utilities=>fill_return( iv_type       = zif_rel_data=>cs_msg-type_error
-                                                      iv_id         = zif_rel_data=>cs_msg-id
-                                                      iv_number     = '033'
-                                                      iv_langu      = mv_langu
-                                                      iv_message_v1 = sy-sysid
-                                                      iv_message_v2 = lv_msgtxt ) INTO TABLE et_return.
-        ENDIF.
-      ENDLOOP.
-
+              IF sy-subrc NE 0.
+                INSERT zcl_ca_utilities=>fill_return( iv_type       = zif_rel_data=>cs_msg-type_error
+                                                         iv_id         = zif_rel_data=>cs_msg-id
+                                                         iv_number     = '033'
+                                                         iv_langu      = mv_langu
+                                                         iv_message_v1 = <ls_rfc_develop>-sysid
+                                                         iv_message_v2 = lv_msgtxt ) INTO TABLE et_return.
+              ENDIF.
+            ENDIF.
+          CATCH cx_sy_itab_line_not_found.
+        ENDTRY.
+      ENDIF.
     ENDIF.
+
+    " Si no hay error entonces actualizo el sistema de producción siempre y cuando estemos en producción
+    IF NOT line_exists( et_return[ type = zif_rel_data=>cs_msg-type_error ] ).
+
+      IF sy-sysid = zif_rel_data=>cs_connectivity-r3_systems-production.
+
+        CALL FUNCTION 'ZREL_UPDATE_SAP_CUSTO'
+          EXPORTING
+            it_t16fs        = mt_t16fs_update
+            it_t16ft        = mt_t16ft_update
+            it_t16fk        = mt_t16fk_update
+            it_t16fv        = mt_t16fv_update
+            it_t16fw        = mt_t16fw_update
+            it_t16fd        = mt_t16fd_update
+            it_t16fc        = mt_t16fc_update
+            it_t16fk_delete = mt_t16fk_delete
+            it_t16fv_delete = mt_t16fv_delete
+            it_t16fw_delete = mt_t16fw_delete
+            iv_commit       = abap_false
+            iv_langu        = mv_langu
+          IMPORTING
+            et_return       = lt_return_prod.
+
+        INSERT LINES OF lt_return_prod INTO TABLE et_return.
+      ENDIF.
+
+
+      IF line_exists( et_return[ type = zif_rel_data=>cs_msg-type_error ] ).
+
+        ROLLBACK WORK.
+
+      ELSE.
+
+        " Ahora actualizamos integración
+        IF sy-sysid = zif_rel_data=>cs_connectivity-r3_systems-integration.
+          CALL FUNCTION 'ZREL_UPDATE_SAP_CUSTO'
+            EXPORTING
+              it_t16fs        = mt_t16fs_update
+              it_t16ft        = mt_t16ft_update
+              it_t16fk        = mt_t16fk_update
+              it_t16fv        = mt_t16fv_update
+              it_t16fw        = mt_t16fw_update
+              it_t16fd        = mt_t16fd_update
+              it_t16fc        = mt_t16fc_update
+              it_t16fk_delete = mt_t16fk_delete
+              it_t16fv_delete = mt_t16fv_delete
+              it_t16fw_delete = mt_t16fw_delete
+              iv_commit       = abap_false
+              iv_langu        = mv_langu
+            IMPORTING
+              et_return       = lt_return_int.
+        ELSE.
+          TRY.
+              ASSIGN lt_rfc[ sysid = zif_rel_data=>cs_connectivity-r3_systems-integration ] TO FIELD-SYMBOL(<ls_rfc_integration>).
+              IF sy-subrc = 0.
+                CALL FUNCTION 'ZREL_UPDATE_SAP_CUSTO' DESTINATION <ls_rfc_integration>-rfc
+                  EXPORTING
+                    it_t16fs              = mt_t16fs_update
+                    it_t16ft              = mt_t16ft_update
+                    it_t16fk              = mt_t16fk_update
+                    it_t16fv              = mt_t16fv_update
+                    it_t16fw              = mt_t16fw_update
+                    it_t16fd              = mt_t16fd_update
+                    it_t16fc              = mt_t16fc_update
+                    it_t16fk_delete       = mt_t16fk_delete
+                    it_t16fv_delete       = mt_t16fv_delete
+                    it_t16fw_delete       = mt_t16fw_delete
+                    iv_commit             = abap_false
+                    iv_langu              = mv_langu
+                  IMPORTING
+                    et_return             = lt_return_int
+                  EXCEPTIONS
+                    communication_failure = 1 MESSAGE lv_msgtxt
+                    system_failure        = 2 MESSAGE lv_msgtxt
+                    OTHERS                = 99.
+
+                IF sy-subrc NE 0.
+                  INSERT zcl_ca_utilities=>fill_return( iv_type       = zif_rel_data=>cs_msg-type_error
+                                                           iv_id         = zif_rel_data=>cs_msg-id
+                                                           iv_number     = '033'
+                                                           iv_langu      = mv_langu
+                                                           iv_message_v1 = <ls_rfc_integration>-sysid
+                                                           iv_message_v2 = lv_msgtxt ) INTO TABLE lt_return_int.
+                ENDIF.
+
+
+              ENDIF.
+            CATCH cx_sy_itab_line_not_found.
+          ENDTRY.
+
+        ENDIF.
+        INSERT LINES OF lt_return_int INTO TABLE et_return.
+
+        " Si no hay errores en el sistema donde estoy actualizo los datos del BOPF
+        IF NOT line_exists( et_return[ type = zif_rel_data=>cs_msg-type_error field = sy-sysid ] ).
+          " Ahora lanzamos el proceso de actualizar el nodo de los importes y aprobadores.
+          update_bopf_node_amounts(  ).
+          update_bopf_node_approvers(  ).
+
+          " Se graban, se hace el commit, los datos en el BOPF y de paso los datos en el customizing de SAP
+          mo_bopf_helper->save_data_bopf(  ).
+        ENDIF.
+      ENDIF.
+    ENDIF.
+
   ENDMETHOD.
 
 
@@ -1502,8 +1641,10 @@ CLASS zcl_rel_strategy_md_crud IMPLEMENTATION.
   METHOD build_custo_approvers.
     DATA lv_code TYPE frgco.
 
-    " Saco los registros que se actualizan
-    DATA(lt_approvers) = VALUE zrel_bo_i_strategy_approvers( FOR <wa1> IN mt_approvers WHERE ( cdchngind IS NOT INITIAL )
+    " Saco los registros que se actualizan: insertar o modificar. Los borrados no se tiene que hacer nada con ellos porque
+    " los códigos de los aprobadores se mantienen.
+    DATA(lt_approvers) = VALUE zrel_bo_i_strategy_approvers( FOR <wa1> IN mt_approvers WHERE ( cdchngind = zif_rel_data=>cs_strategy-change_request-change_indicator-insert
+                                                                                               OR cdchngind = zif_rel_data=>cs_strategy-change_request-change_indicator-update )
                                                                  ( CORRESPONDING #( <wa1> ) ) ).
     IF lt_approvers IS NOT INITIAL.
 
@@ -1517,7 +1658,7 @@ CLASS zcl_rel_strategy_md_crud IMPLEMENTATION.
                                                   IMPORTING et_user_lib_group = mt_users_from_lib_group ).
 
       " Se recorre los aprobadores para ir construyendo las tablas segun el tipo de actualizacion
-      LOOP AT lt_approvers ASSIGNING FIELD-SYMBOL(<ls_approvers>).
+      LOOP AT lt_approvers ASSIGNING FIELD-SYMBOL(<ls_approvers>) .
         " Miro si el código y usuario que estoy leyendo ya lo tiene asignado el usuario en el custo. Si es así, es que lo he añadido y ahora
         " debo estar en un reproceso o es un codigo que ya esta asignado a un usuario. En ese caso no busco código porque ya lo tengo pero repetiré el proceso de actualiazción porque no sé en que
         " sistemas habrá fallado
@@ -1570,18 +1711,17 @@ CLASS zcl_rel_strategy_md_crud IMPLEMENTATION.
 
       ENDLOOP.
 
-      " Una vez determinados los códigos de aprobación hay que actualizar los estados de liberación que
-      " depende del grupo de liberación y estrategia.
-      build_liberation_statuses(  ).
-
-
     ENDIF.
 
+    " En la actualización o borrado hay que actualizar los estados de liberación.
+    IF lt_approvers IS NOT INITIAL
+       OR line_exists( mt_approvers[ cdchngind = zif_rel_data=>cs_strategy-change_request-change_indicator-delete ] ).
+      build_liberation_statuses(  ).
+    ENDIF.
   ENDMETHOD.
 
 
   METHOD det_new_approver_code.
-    DATA lv_texto_baja TYPE frgxt.
 
     CLEAR: et_return.
 
@@ -1602,14 +1742,12 @@ CLASS zcl_rel_strategy_md_crud IMPLEMENTATION.
         mt_t16fd = mo_md_query->get_descriptions_release_code( iv_group = is_approver-group ).
       ENDIF.
 
-      zcl_rel_constants=>obtener_constantes( EXPORTING iv_constant = 'CUSTO_TEXTO_BAJA'
-                                           IMPORTING ev_value    = lv_texto_baja ).
 
       " Hago un bucle porque hay que tener en cuenta que el codigo que pueda encontrar ya lo he econtrado y procesado
       " en un aprobador anterior.
       LOOP AT mt_t16fd ASSIGNING FIELD-SYMBOL(<ls_t16fd>)
                        WHERE frggr = is_approver-group
-                             AND frgct = lv_texto_baja.
+                             AND frgct = mv_texto_baja.
         IF NOT line_exists( mt_t16fw_update[ frggr = <ls_t16fd>-frggr
                                              frgco = <ls_t16fd>-frgco ] ).
           ev_code = <ls_t16fd>-frgco.
@@ -1646,21 +1784,16 @@ CLASS zcl_rel_strategy_md_crud IMPLEMENTATION.
 
     ENDIF.
 
-    " Miro si el grupo y codigo no lo he insertado previamente. Si no es así añado los registros a las tablas de customizing.
-    IF NOT line_exists( mt_t16fw_update[ frggr = is_approver-group
-                                         frgco = is_approver-code ] ).
 
-      fill_it_upd_md_approvers( EXPORTING iv_code = ev_code
-                                      is_approver = is_approver
-                            IMPORTING et_return = et_return ).
-
-    ENDIF.
+    fill_it_upd_md_approvers( EXPORTING iv_code = ev_code
+                                    is_approver = is_approver
+                          IMPORTING et_return = et_return ).
 
   ENDMETHOD.
 
 
   METHOD get_code_user_to_group.
-    DATA lv_texto_baja TYPE frgxt.
+
 
     CLEAR: rv_code.
 
@@ -1678,9 +1811,6 @@ CLASS zcl_rel_strategy_md_crud IMPLEMENTATION.
       IF sy-subrc = 0.
         rv_code = <ls_lib_group_user>-code.
       ELSE.
-        " Saco el texto que se pone cuando un codigo este dado de baja
-        zcl_rel_constants=>obtener_constantes( EXPORTING iv_constant = 'CUSTO_TEXTO_BAJA'
-                                             IMPORTING ev_value    = lv_texto_baja ).
 
         " Ahora vamos a mirar que codigos de usuario tiene en otros grupos para ver si se puede utilizar
         LOOP AT mt_lib_group_of_user ASSIGNING FIELD-SYMBOL(<ls_lib_other_group_user>)
@@ -1692,7 +1822,7 @@ CLASS zcl_rel_strategy_md_crud IMPLEMENTATION.
                                                       code = <ls_lib_other_group_user>-code.
           IF sy-subrc = 0.
             " Existe, pero vamos a mirar si esta marcado como baja. Si esta como baja se puede usar el código
-            IF <ls_code_free>-username_desc = lv_texto_baja.
+            IF <ls_code_free>-username_desc = mv_texto_baja.
               rv_code = <ls_code_free>-code.
             ENDIF.
           ELSE. " Si no existe lo podemos utilizar.
@@ -1770,7 +1900,7 @@ CLASS zcl_rel_strategy_md_crud IMPLEMENTATION.
       " y me aseguro que estará bien en todos los idiomas.
       INSERT LINES OF build_text_t16fd( EXPORTING iv_group = is_approver-group
                                                  iv_code = iv_code
-                                                 iv_text = is_approver-username_desc ) INTO TABLE mt_t16fd_update.
+                                                 iv_text = |{ is_approver-username_desc CASE = UPPER }| ) INTO TABLE mt_t16fd_update.
 
     ENDIF.
 
@@ -1816,7 +1946,7 @@ CLASS zcl_rel_strategy_md_crud IMPLEMENTATION.
     " Segun el motivo del cambio el proceso puede variar.
     CASE is_approver-type_change.
       WHEN zif_rel_data=>cs_strategy-change_request-type_change_approver-cancelation.
-        " Mirarmos si el usuario tiene código en otro grupo
+        " Mirarmos si el usuario tiene código en el grupo actual o en otro grupo
         ev_code = get_code_user_to_group( iv_username  = is_approver-username
                                                 iv_group_of_code = is_approver-group ).
         " El usuario no tiene código de aprobación por lo tanto aprovecharemos el código existente para asignarlo
@@ -1835,17 +1965,26 @@ CLASS zcl_rel_strategy_md_crud IMPLEMENTATION.
           " Devuelve el mismo código que el que ya tiene
           ev_code = is_approver-code.
         ELSE.
-          " Si ya existe Vamos a dar de baja el usuario actual del código en todos los sitios donde este. Se le pasa
-          " el usuario que esta actualmente en la foto de SAP ya que es ese el usuario que hay darlo de baja.
-          fill_del_user_groups( EXPORTING iv_username = mt_approvers_sap[ group = is_approver-group
-                                                                          code = is_approver-code ]-username ).
 
-          " Hago el reemplazo del usuario que ya habia antes por el nuevo.
-          DATA(ls_new_approver) = is_approver.
-          ls_new_approver-code = ev_code.
-          fill_repl_user_groups( EXPORTING is_old_approver = CORRESPONDING #( mt_approvers_sap[ group = is_approver-group
-                                                                                                code = is_approver-code ] )
-                                           is_new_approver = ls_new_approver ).
+          " Si el código obtenido es el mismo que el que ya tenía entonces se ha producido una incongruencia en la selección.
+          " Incongruencia porque no tiene sentido dar de baja un codigo que lo vuelves a asignar.
+          " En ese caso no haré nada, se queda todo como est.a
+          IF ev_code NE is_approver-code.
+
+            " Si ya existe vamos a dar de baja el usuario actual del código en todos los sitios donde este. Se le pasa
+            " el usuario que esta actualmente en la foto de SAP ya que es ese el usuario que hay darlo de baja.
+            fill_del_user_groups( EXPORTING is_old_approver = mt_approvers_sap[ group = is_approver-group
+                                                                                code = is_approver-code ] ).
+
+            " Hago el reemplazo del usuario que ya habia antes por el nuevo.
+            DATA(ls_new_approver) = is_approver.
+            ls_new_approver-code = ev_code.
+            fill_repl_user_groups( EXPORTING is_old_approver = CORRESPONDING #( mt_approvers_sap[ group = is_approver-group
+                                                                                                  code = is_approver-code ] )
+                                             is_new_approver = ls_new_approver ).
+
+          ENDIF.
+
         ENDIF.
       WHEN zif_rel_data=>cs_strategy-change_request-type_change_approver-change_functions.
         " El cambio de funciones implica que el usuario actual sigue conservando el código. Y para el nuevo
@@ -1859,64 +1998,116 @@ CLASS zcl_rel_strategy_md_crud IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD fill_it_dele_md_approvers.
-    DATA lv_texto_baja TYPE frgxt.
-
-    " El usuario se borrará en la tabla T16FW.
-    INSERT VALUE #( frggr = is_approver-group
-                  frgco = is_approver-code
-                  otype = zif_rel_data=>cs_strategy-master_data-otype_usersap
-                  objid = is_approver-username ) INTO TABLE mt_t16fw_delete.
 
 
-    " En la denominación del código pondré que el usuario esta dado de baja para que se pueda reaprovechar
-    zcl_rel_constants=>obtener_constantes( EXPORTING iv_constant = 'CUSTO_TEXTO_BAJA'
-                                   IMPORTING ev_value    = lv_texto_baja ).
+    " Si hay usuario se borrará en la tabla T16FW.
+    IF is_approver-username IS NOT INITIAL.
+      INSERT VALUE #( frggr = is_approver-group
+                    frgco = is_approver-code
+                    otype = zif_rel_data=>cs_strategy-master_data-otype_usersap
+                    objid = is_approver-username ) INTO TABLE mt_t16fw_delete.
+    ENDIF.
 
     INSERT LINES OF build_text_t16fd( EXPORTING iv_group = is_approver-group
                                                iv_code = is_approver-code
-                                               iv_text = CONV #( lv_texto_baja ) ) INTO TABLE mt_t16fd_update.
+                                               iv_text = CONV #( mv_texto_baja ) ) INTO TABLE mt_t16fd_update.
 
   ENDMETHOD.
 
 
   METHOD fill_del_user_groups.
 
-    IF iv_username IS INITIAL. EXIT. ENDIF.
-
-    " Sacamos en todos los sitios donde esta el usuario
-    mo_md_query->get_liberation_code_from_user( EXPORTING it_r_users        = VALUE #( ( sign = 'I' option = 'EQ' low = iv_username ) )
-                                                IMPORTING et_user_lib_group = DATA(lt_user_codes) ).
-
-    " Por cada sitio donde esta el usuario vamos llamando al método que alimenta las tablas internas para realizar el borrado.
-    LOOP AT lt_user_codes ASSIGNING FIELD-SYMBOL(<ls_user_codes>).
-      fill_it_dele_md_approvers( is_approver = VALUE #( group = <ls_user_codes>-group
-                                                        code = <ls_user_codes>-code
-                                                        username = <ls_user_codes>-username )  ).
-
+    " Antes de borrar se mira si el usuario que voy a borrar esta en un proceso de actualización. Si es así, no lo voy a borrar
+    " porque luego se va a tener que usar su codigo. Esto tampoco tiene mucho sentido pero hemos visto que hay equivocaciones
+    " en el cambio de usuarios y en vez de seleccionar cambio de funcionalidad seleccionan la baja, pero en un nivel siguente o anterior ponen
+    " un cambio de funcionalidad.
+    LOOP AT mt_approvers TRANSPORTING NO FIELDS WHERE username =  is_old_approver-username
+                                                      AND cdchngind NE ''.
+      EXIT.
     ENDLOOP.
+    IF sy-subrc NE 0.
+
+      " Si el codigo tiene usuario se va a eliminar de todos los códigos donde esta asignado, y el código se le pondrá el texto de BAJA
+      IF is_old_approver-username IS NOT INITIAL.
+        " Sacamos en todos los sitios donde esta el usuario
+        mo_md_query->get_liberation_code_from_user( EXPORTING it_r_users        = VALUE #( ( sign = 'I' option = 'EQ' low = is_old_approver-username ) )
+                                                    IMPORTING et_user_lib_group = DATA(lt_user_codes) ).
+
+        " Por cada sitio donde esta el usuario vamos llamando al método que alimenta las tablas internas para realizar el borrado.
+        LOOP AT lt_user_codes ASSIGNING FIELD-SYMBOL(<ls_user_codes>).
+
+          " Si para el grupo y codigo esta dentro de la tabla de actualización de codigos no lo borro porque ese codigo se reaprovechará para otro usuario.
+          IF NOT line_exists( mt_t16fw_update[ frggr = <ls_user_codes>-group frgco = <ls_user_codes>-code  ] ).
+
+            fill_it_dele_md_approvers( is_approver = VALUE #( group = <ls_user_codes>-group
+                                                              code = <ls_user_codes>-code
+                                                              username = <ls_user_codes>-username )  ).
+
+          ENDIF.
+
+        ENDLOOP.
+
+      ELSE.
+
+        " Si el código no tiene usuario solo se pone el código de liberación como baja.
+        fill_it_dele_md_approvers( is_approver = VALUE #( group = is_old_approver-group
+                                                          code = is_old_approver-code )  ).
+
+      ENDIF.
+
+    ENDIF.
 
   ENDMETHOD.
 
 
   METHOD fill_repl_user_groups.
-    IF is_old_approver IS INITIAL. EXIT. ENDIF.
 
-    " Sacamos en todos los sitios donde esta el usuario antiguo
-    mo_md_query->get_liberation_code_from_user( EXPORTING it_r_users        = VALUE #( ( sign = 'I' option = 'EQ' low = is_old_approver-username ) )
-                                                IMPORTING et_user_lib_group = DATA(lt_user_codes) ).
+    " Primero vamos actualizar el grupo que se esta tratando.
+    fill_it_upd_md_approvers(
+                   EXPORTING
+                     iv_code       = is_new_approver-code
+                     is_approver   = is_new_approver
+                     iv_fill_t16fw = abap_true
+                     iv_fill_t16fc = abap_true
+                     iv_fill_t16fs = abap_true ).
 
-    " Por cada sitio donde esta el usuario antiguo le cambio el usuario y descripción. El resto de parametrización
-    " no se toca porque solo hay que ajusta el usuario.
-    LOOP AT lt_user_codes ASSIGNING FIELD-SYMBOL(<ls_user_codes>).
-      fill_it_upd_md_approvers(
-           EXPORTING
-             iv_code       = is_new_approver-code
-             is_approver   = is_new_approver
-             iv_fill_t16fw = abap_true
-             iv_fill_t16fc = abap_true
-             iv_fill_t16fs = abap_true ).
+    " Si el código de liberación tiene usuario lo que se hace es poner el nuevo código en los grupos de liberación donde
+    " estaba al antiguo.
+    IF is_old_approver-username IS NOT INITIAL.
 
-    ENDLOOP.
+      mo_md_query->get_liberation_code_from_user( EXPORTING it_r_users        = VALUE #( ( sign = 'I' option = 'EQ' low = is_old_approver-username ) )
+                                                  IMPORTING et_user_lib_group = DATA(lt_user_codes) ).
+
+      IF lt_user_codes IS NOT INITIAL.
+
+        mo_md_query->get_approv_strat_from_group( EXPORTING it_group_code = CORRESPONDING #( lt_user_codes )
+                                                            iv_filter_lib_code = abap_true
+                                                  IMPORTING et_approvers = DATA(lt_user_strategy) ).
+
+        LOOP AT lt_user_strategy ASSIGNING FIELD-SYMBOL(<ls_user_codes>).
+
+          " Si para el grupo y codigo esta dentro de la tabla de actualización de codigos no lo reemplazo porque ya se va hacer.
+          IF NOT line_exists( mt_t16fw_update[ frggr = <ls_user_codes>-group frgco = <ls_user_codes>-code  ] ).
+
+            fill_it_upd_md_approvers(
+                 EXPORTING
+                   iv_code       = is_new_approver-code
+                   is_approver   = VALUE #( group = <ls_user_codes>-group
+                                            code = is_new_approver-code
+                                            strategy = <ls_user_codes>-strategy
+                                            username = is_new_approver-username
+                                            username_desc = is_new_approver-username_desc )
+                   iv_fill_t16fw = abap_true
+                   iv_fill_t16fc = abap_true
+                   iv_fill_t16fs = abap_true ).
+
+          ENDIF.
+
+        ENDLOOP.
+
+      ENDIF.
+
+    ENDIF.
 
   ENDMETHOD.
 
@@ -1937,7 +2128,7 @@ CLASS zcl_rel_strategy_md_crud IMPLEMENTATION.
                                             IMPORTING et_t16fk      = DATA(lt_t16fk)
                                                       et_t16fv      = DATA(lt_t16fv) ).
 
-      " Si tengo datos los añado a la tabla de borrado. El miotivo es que el código de liberación es clave en ambas tablas y por lo tanto
+      " Si tengo datos los añado a la tabla de borrado. El motivo es que el código de liberación es clave en ambas tablas y por lo tanto
       " me es mucho más sencillo borrarlo y crearlo de nuevo, que mirar que cambia y que no. Porque al final casi el 100% de casos habrá que borrar algun
       " que otro registro.
       INSERT LINES OF lt_t16fk INTO TABLE mt_t16fk_delete.
@@ -1948,66 +2139,211 @@ CLASS zcl_rel_strategy_md_crud IMPLEMENTATION.
 
         " Paso la estructura en tabla interna que me servirá para alimentar las tablas de estados
         DATA(lt_t16fs_column) = mo_md_query->convert_t16fs_row_data( is_t16fs = <ls_t16fs> ).
-        DATA(lv_num_approvers) = lines( lt_t16fs_column ).
 
-        " Los estados de liberación se informan en dos tablas: T16FV y T16FK.
+        IF lt_t16fs_column IS NOT INITIAL. " Cuando se borra no habrá codigos de liberación
 
-        " Para el estado de liberación tiene que tener un primer registro en blanco con todos los códigos desmarcados
-        " y bloqueados.
-        INSERT VALUE #( frggr = <ls_t16fs>-frggr
-                        frgsx = <ls_t16fs>-frgsx
-                        frgkx = zif_rel_data=>cs_strategy-master_data-release_indicator-blocked ) INTO TABLE mt_t16fk_update.
+          DATA(lv_num_approvers) = lines( lt_t16fs_column ).
 
+          " Los estados de liberación se informan en dos tablas: T16FV y T16FK.
 
-
-        LOOP AT lt_t16fs_column ASSIGNING FIELD-SYMBOL(<ls_t16fs_column>).
-          DATA(lv_tabix) = sy-tabix.
-
-          " Añdimos el registro del requisito de liberación que es  donde se le indica el nivel de los codigos. Por ello vamos a recorrer cada uno de los
-          " códigos para colocarlo y marcarlos.
-          " Añadimos el código y lo asignamos a un puntero.
-          INSERT VALUE #(  frggr = <ls_t16fs_column>-group
-                           frgsx = <ls_t16fs_column>-strategy
-                           frgco = <ls_t16fs_column>-code )
-                        INTO TABLE mt_t16fv_update
-                        ASSIGNING FIELD-SYMBOL(<ls_t16fv>).
-
-          "Añdimos el reguistro de los estados. Este registro se rellena como si fuera un rectangulo, se van marcados cada FRGAx con X
-          " según su nivel.
+          " Para el estado de liberación tiene que tener un primer registro en blanco con todos los códigos desmarcados
+          " y bloqueados.
           INSERT VALUE #( frggr = <ls_t16fs>-frggr
-             frgsx = <ls_t16fs>-frgsx
-             frgkx = COND #( WHEN lv_tabix = lv_num_approvers THEN zif_rel_data=>cs_strategy-master_data-release_indicator-released
-                                                              ELSE zif_rel_data=>cs_strategy-master_data-release_indicator-blocked ) )
-             INTO TABLE mt_t16fk_update
-             ASSIGNING FIELD-SYMBOL(<ls_t16fk>).
+                          frgsx = <ls_t16fs>-frgsx
+                          frgkx = zif_rel_data=>cs_strategy-master_data-release_indicator-blocked ) INTO TABLE mt_t16fk_update.
 
-          DO <ls_t16fs_column>-level TIMES.
-            " El campo común para ambas tablas-
-            DATA(lv_campo) = |FRGA{ sy-index }|.
 
-            " Los campos "FRGAx" de los requisitos se rellenan de la siguiente manera:
-            " Se pone una 'X' cuando en el nivel de aprobación donde esta situado el código.
-            " Se pone un '+' cuando el nivel es inferior al del código
-            ASSIGN COMPONENT lv_campo OF STRUCTURE <ls_t16fv> TO FIELD-SYMBOL(<field>).
-            IF sy-subrc = 0.
-              IF sy-index = <ls_t16fs_column>-level.
-                <field> = zif_rel_data=>cs_strategy-master_data-release_strag_indicator-fixed.
-              ELSE.
-                <field> = zif_rel_data=>cs_strategy-master_data-release_strag_indicator-required.
+
+          LOOP AT lt_t16fs_column ASSIGNING FIELD-SYMBOL(<ls_t16fs_column>).
+            DATA(lv_tabix) = sy-tabix.
+
+            " Añdimos el registro del requisito de liberación que es  donde se le indica el nivel de los codigos. Por ello vamos a recorrer cada uno de los
+            " códigos para colocarlo y marcarlos.
+            " Añadimos el código y lo asignamos a un puntero.
+            INSERT VALUE #(  frggr = <ls_t16fs_column>-group
+                             frgsx = <ls_t16fs_column>-strategy
+                             frgco = <ls_t16fs_column>-code )
+                          INTO TABLE mt_t16fv_update
+                          ASSIGNING FIELD-SYMBOL(<ls_t16fv>).
+
+            "Añdimos el reguistro de los estados. Este registro se rellena como si fuera un rectangulo, se van marcados cada FRGAx con X
+            " según su nivel.
+            INSERT VALUE #( frggr = <ls_t16fs>-frggr
+               frgsx = <ls_t16fs>-frgsx
+               frgkx = COND #( WHEN lv_tabix = lv_num_approvers THEN zif_rel_data=>cs_strategy-master_data-release_indicator-released
+                                                                ELSE zif_rel_data=>cs_strategy-master_data-release_indicator-blocked ) )
+               INTO TABLE mt_t16fk_update
+               ASSIGNING FIELD-SYMBOL(<ls_t16fk>).
+
+            DO <ls_t16fs_column>-level TIMES.
+              " El campo común para ambas tablas-
+              DATA(lv_campo) = |FRGA{ sy-index }|.
+
+              " Los campos "FRGAx" de los requisitos se rellenan de la siguiente manera:
+              " Se pone una 'X' cuando en el nivel de aprobación donde esta situado el código.
+              " Se pone un '+' cuando el nivel es inferior al del código
+              ASSIGN COMPONENT lv_campo OF STRUCTURE <ls_t16fv> TO FIELD-SYMBOL(<field>).
+              IF sy-subrc = 0.
+                IF sy-index = <ls_t16fs_column>-level.
+                  <field> = zif_rel_data=>cs_strategy-master_data-release_strag_indicator-fixed.
+                ELSE.
+                  <field> = zif_rel_data=>cs_strategy-master_data-release_strag_indicator-required.
+                ENDIF.
               ENDIF.
-            ENDIF.
 
-            ASSIGN COMPONENT lv_campo OF STRUCTURE <ls_t16fk> TO <field>.
-            IF sy-subrc = 0.
-              <field> = zif_rel_data=>cs_strategy-master_data-release_strag_indicator-fixed.
-            ENDIF.
-          ENDDO.
+              ASSIGN COMPONENT lv_campo OF STRUCTURE <ls_t16fk> TO <field>.
+              IF sy-subrc = 0.
+                <field> = zif_rel_data=>cs_strategy-master_data-release_strag_indicator-fixed.
+              ENDIF.
+            ENDDO.
 
-        ENDLOOP.
-
+          ENDLOOP.
+        ENDIF.
       ENDLOOP.
 
     ENDLOOP.
+
+  ENDMETHOD.
+
+
+  METHOD delete_approvers_t16fs.
+
+    DATA(lv_index_main) = 1.
+    DO.
+
+      DATA(lv_campo) = |FRGC{ lv_index_main }|.
+
+      ASSIGN COMPONENT lv_campo OF STRUCTURE cs_t16fs TO FIELD-SYMBOL(<field>).
+      IF sy-subrc = 0.
+        IF <field> IS NOT INITIAL.
+
+          " Si el código de aprobación esta marcado para probar se quita el codigo y se desplazan los aprobadores
+          IF line_exists( mt_approvers[ group = cs_t16fs-frggr
+                                        strategy = cs_t16fs-frgsx
+                                        code = <field>
+                                        cdchngind = zif_rel_data=>cs_strategy-change_request-change_indicator-delete ] ).
+
+            CLEAR: <field>. " Lo limpio antes si el proceso no lo puedo machacar
+
+            DATA(lv_index) = sy-index.
+            DATA(lv_move_code) = abap_false.
+            DO.
+
+              lv_campo = |FRGC{ lv_index }|.
+              ASSIGN COMPONENT lv_campo OF STRUCTURE cs_t16fs TO <field>.
+
+              DATA(lv_index_next) = lv_index + 1.
+              DATA(lv_campo_next) = |FRGC{ lv_index_next }|.
+
+              ASSIGN COMPONENT lv_campo_next OF STRUCTURE cs_t16fs TO FIELD-SYMBOL(<field_next>).
+              IF sy-subrc = 0.
+                IF <field_next> IS NOT INITIAL.
+                  <field> = <field_next>.
+
+                  " Borro el siguiente por si en la siguiente iteracción no puede sobreescribirse por ser el ultimo.
+                  CLEAR: <field_next>.
+
+                  lv_move_code = abap_true.
+
+                ELSE.
+                  EXIT.
+                ENDIF.
+
+              ELSE.
+                EXIT.
+              ENDIF.
+              lv_index = lv_index + 1.
+            ENDDO.
+
+          ENDIF.
+
+        ELSE.
+          EXIT.
+        ENDIF.
+        " Solo si no hemos movido codigos incrementaremos uno el valor. Si se ha movido nos quedamos
+        " donde estamos para verificar que el codigo que se ha movido a esta posición esta también borrado.
+        IF lv_move_code = abap_false.
+          lv_index_main = lv_index_main + 1.
+        ENDIF.
+      ELSE.
+        EXIT.
+      ENDIF.
+    ENDDO.
+
+  ENDMETHOD.
+
+
+  METHOD delete_amount.
+
+    DATA: lt_allocvaluesnum  TYPE STANDARD TABLE OF bapi1003_alloc_values_num WITH EMPTY KEY.
+    DATA: lt_allocvalueschar TYPE STANDARD TABLE OF bapi1003_alloc_values_char WITH EMPTY KEY.
+    DATA: lt_allocvaluescurr TYPE STANDARD TABLE OF bapi1003_alloc_values_curr WITH EMPTY KEY.
+    DATA: lt_return TYPE STANDARD TABLE OF bapiret2 WITH EMPTY KEY.
+    DATA: lv_status        TYPE clstatus.
+    DATA: lv_standardclass TYPE stdclass.
+    DATA lt_bsart TYPE STANDARD TABLE OF atwrt.
+
+    CLEAR: et_return.
+
+    " Primero hemos de sacar los datos actuales que tiene el sistema de clasificación
+    " para el código y grupo de liberación
+
+    " Sacamos la tabla
+    DATA(lv_obtab) = get_klart_table( ).
+
+    " Antes de borrar vamos a asegurarnos que existe
+    DATA(lv_objectkey) = CONV objnum( |{ is_amount-group }{ is_amount-strategy }| ).
+    CALL FUNCTION 'BAPI_OBJCL_GETDETAIL'
+      EXPORTING
+        objectkey       = lv_objectkey
+        objecttable     = lv_obtab
+        classnum        = zif_rel_data=>cs_strategy-classification-klasse
+        classtype       = zif_rel_data=>cs_strategy-classification-klart
+      IMPORTING
+        status          = lv_status
+        standardclass   = lv_standardclass
+      TABLES
+        allocvaluesnum  = lt_allocvaluesnum[]
+        allocvalueschar = lt_allocvalueschar[]
+        allocvaluescurr = lt_allocvaluescurr[]
+        return          = lt_return[].
+
+    READ TABLE lt_return ASSIGNING FIELD-SYMBOL(<ls_return_bapi>) WITH KEY type = zif_rel_data=>cs_msg-type_error.
+    IF sy-subrc NE 0.
+      CLEAR: lt_return.
+
+      CALL FUNCTION 'BAPI_OBJCL_DELETE'
+        EXPORTING
+          objectkey   = lv_objectkey
+          objecttable = lv_obtab
+          classnum    = zif_rel_data=>cs_strategy-classification-klasse
+          classtype   = zif_rel_data=>cs_strategy-classification-klart
+        TABLES
+          return      = lt_return.
+
+      READ TABLE lt_return ASSIGNING <ls_return_bapi> WITH KEY type = zif_rel_data=>cs_msg-type_error.
+      IF sy-subrc NE 0.
+        INSERT zcl_ca_utilities=>fill_return( iv_id = zif_rel_data=>cs_msg-id
+                                                iv_type = zif_rel_data=>cs_msg-type_success
+                                                iv_number = '039'
+                                                iv_message_v1 = is_amount-group
+                                                iv_message_v2 = is_amount-strategy ) INTO TABLE et_return.
+      ELSE.
+        INSERT <ls_return_bapi> INTO TABLE et_return.
+      ENDIF.
+    ELSE.
+      INSERT <ls_return_bapi> INTO TABLE et_return.
+    ENDIF.
+
+  ENDMETHOD.
+
+
+  METHOD read_constants.
+    zcl_rel_constants=>obtener_constantes( EXPORTING iv_constant = 'LANGU_TEXTO_BAJA'
+                                                    IMPORTING ev_value    = mv_langu_texto_baja ).
+
+    zcl_rel_constants=>obtener_constantes( EXPORTING iv_constant = 'CUSTO_TEXTO_BAJA'
+                                               IMPORTING ev_value    = mv_texto_baja ).
 
   ENDMETHOD.
 

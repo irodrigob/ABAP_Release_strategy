@@ -15,12 +15,13 @@ INTERFACE zif_rel_data
   TYPES: BEGIN OF ts_users,
            username      TYPE xubname,
            username_desc TYPE string,
+           username_desc_search TYPE string,
          END OF ts_users.
   TYPES: tt_users TYPE STANDARD TABLE OF ts_users WITH DEFAULT KEY.
   TYPES: BEGIN OF ts_users_purchase_group.
-      INCLUDE TYPE ts_users.
-  TYPES: purchase_group      TYPE ekgrp,
-         purchase_group_desc TYPE eknam,
+           INCLUDE TYPE ts_users.
+           TYPES: purchase_group      TYPE ekgrp,
+           purchase_group_desc TYPE eknam,
          END OF ts_users_purchase_group.
   TYPES: tt_users_purchase_group TYPE STANDARD TABLE OF ts_users_purchase_group WITH EMPTY KEY.
 
@@ -126,8 +127,9 @@ INTERFACE zif_rel_data
              END OF cs_msg.
   CONSTANTS: BEGIN OF cs_strategy,
                BEGIN OF classification,
-                 klart  TYPE ausp-klart VALUE '032',
-                 klasse TYPE klasse_d VALUE 'GXX_EKKO',
+                 klart               TYPE ausp-klart VALUE '032',
+                 klasse              TYPE klasse_d VALUE 'GXX_EKKO',
+                 charac_sep_relation TYPE c LENGTH 1 VALUE '-',
                  BEGIN OF value_relation,
                    between      TYPE atcod VALUE '3',
                    less_than    TYPE atcod VALUE '7',
@@ -246,5 +248,10 @@ INTERFACE zif_rel_data
                  grd_rol  TYPE zrel_e_sys_type VALUE 'R',
                  grd_user TYPE zrel_e_sys_type VALUE 'U',
                END OF system_type,
+               BEGIN OF r3_systems,
+                 development TYPE syst_sysid VALUE 'GPD',
+                 production  TYPE syst_sysid VALUE 'APT',
+                 integration TYPE syst_sysid VALUE 'GPI',
+               END OF r3_systems,
              END OF cs_connectivity.
 ENDINTERFACE.

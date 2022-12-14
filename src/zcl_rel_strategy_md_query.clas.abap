@@ -5,9 +5,9 @@ CLASS zcl_rel_strategy_md_query DEFINITION
   PUBLIC SECTION.
 
     TYPES: BEGIN OF ts_user_pgroup_depart_subs.
-        INCLUDE TYPE zif_rel_data=>ts_users_purchase_group.
-    TYPES: dept_subs      TYPE zrel_e_depart_subsidiary,
-           dept_subs_desc TYPE zrel_e_depart_subsidiary_desc,
+             INCLUDE TYPE zif_rel_data=>ts_users_purchase_group.
+             TYPES: dept_subs      TYPE zrel_e_depart_subsidiary,
+             dept_subs_desc TYPE zrel_e_depart_subsidiary_desc,
            END OF ts_user_pgroup_depart_subs.
     TYPES: tt_user_pgroup_depart_subs TYPE STANDARD TABLE OF ts_user_pgroup_depart_subs WITH EMPTY KEY.
     TYPES: BEGIN OF ts_user_depart_subs,
@@ -28,13 +28,25 @@ CLASS zcl_rel_strategy_md_query DEFINITION
              value_currency TYPE waers,
            END OF ts_query_classification.
     TYPES: tt_query_classification TYPE STANDARD TABLE OF ts_query_classification WITH EMPTY KEY.
+    TYPES: BEGIN OF ts_strategy_amount,
+             purchase_group      TYPE ekgrp,
+             purchase_group_desc TYPE eknam,
+             group               TYPE t16fw-frggr,
+             strategy            TYPE t16fs-frgsx,
+             value               TYPE atwrt,
+             value_operand       TYPE zrel_e_strategy_operand,
+             value_amount        TYPE zrel_e_strategy_amount,
+             value_amount2       TYPE zrel_e_strategy_amount,
+             value_currency      TYPE waers,
+           END OF ts_strategy_amount.
+    TYPES: tt_strategy_amount TYPE STANDARD TABLE OF ts_strategy_amount WITH EMPTY KEY.
     TYPES: BEGIN OF ts_dept_purchase_group,
              dept_subs           TYPE zrel_e_depart_subsidiary,
              dept_subs_desc      TYPE zrel_t002t-description,
              purchase_group      TYPE ekgrp,
              purchase_group_desc TYPE eknam,
            END OF ts_dept_purchase_group.
-    TYPES: tt_dept_purchase_group TYPE STANDARD TABLE OF ts_dept_purchase_group WITH EMPTY KEY.
+    TYPES: tt_dept_purchase_group TYPE STANDARD TABLE OF ts_dept_purchase_group WITH DEFAULT KEY.
     TYPES: BEGIN OF ts_user_lib_group,
              username      TYPE xubname,
              username_desc TYPE ad_namtext,
@@ -74,7 +86,40 @@ CLASS zcl_rel_strategy_md_query DEFINITION
              group_desc TYPE t16fh-frggt,
            END OF ts_liberation_group_list.
     TYPES: tt_liberation_group_list TYPE STANDARD TABLE OF ts_liberation_group_list WITH EMPTY KEY.
-
+    TYPES: BEGIN OF ts_lib_group_code,
+             group TYPE t16fw-frggr,
+             code  TYPE t16fw-frgco,
+           END OF ts_lib_group_code.
+    TYPES: tt_lib_group_code TYPE STANDARD TABLE OF ts_lib_group_code WITH DEFAULT KEY.
+    TYPES: BEGIN OF ts_username_desc,
+             username      TYPE xubname,
+             username_desc TYPE ad_namtext,
+           END OF ts_username_desc.
+    TYPES: tt_username_desc TYPE STANDARD TABLE OF ts_username_desc WITH EMPTY KEY.
+    TYPES: BEGIN OF ts_strategy_approvers.
+             INCLUDE TYPE ts_strategy_code_approvers.
+             INCLUDE TYPE ts_username_desc.
+           TYPES: END   OF ts_strategy_approvers.
+    TYPES: tt_strategy_approvers TYPE STANDARD TABLE OF ts_strategy_approvers WITH DEFAULT KEY.
+    TYPES: BEGIN OF ts_purchase_group_list,
+             pgroup             TYPE t024-ekgrp,
+             pgroup_desc        TYPE t024-eknam,
+             pgroup_desc_search TYPE t024-eknam,
+           END OF ts_purchase_group_list.
+    TYPES: tt_purchase_group_list TYPE STANDARD TABLE OF ts_purchase_group_list WITH DEFAULT KEY.
+    TYPES: BEGIN OF ts_code_liberation_list,
+             group            TYPE t16fc-frggr,
+             code             TYPE t16fc-frgco,
+             code_desc        TYPE t16fd-frgct,
+             code_desc_search TYPE t16fd-frgct,
+             username         TYPE t16fw-objid,
+           END OF ts_code_liberation_list.
+    TYPES: tt_code_liberation_list TYPE STANDARD TABLE OF ts_code_liberation_list WITH DEFAULT KEY.
+    TYPES:BEGIN OF ts_filter_liberation_code,
+            group TYPE t16fs-frggr,
+            code  TYPE t16fw-frgco,
+          END OF ts_filter_liberation_code.
+    TYPES: tt_filter_liberation_code TYPE STANDARD TABLE OF ts_filter_liberation_code WITH EMPTY KEY.
     "! <p class="shorttext synchronized">CONSTRUCTOR</p>
     "! @parameter iv_langu | <p class="shorttext synchronized">Idioma</p>
     METHODS constructor
@@ -213,7 +258,7 @@ CLASS zcl_rel_strategy_md_query DEFINITION
       IMPORTING
                 iv_purchase_group TYPE ekgrp
       RETURNING VALUE(rv_group)   TYPE frggr.
-    "! <p class="shorttext synchronized">Devuelve el grupo Lib. a partir del grupo de compras</p>
+    "! <p class="shorttext synchronized">Devuelve Códigos de liberación de un grupo de liberación</p>
     "! @parameter iv_group | <p class="shorttext synchronized">Grupo de liberación</p>
     "! @parameter it_r_group | <p class="shorttext synchronized">Rango de grupo de liberación</p>
     "! @parameter iv_langu | <p class="shorttext synchronized">idioma</p>
@@ -305,41 +350,7 @@ CLASS zcl_rel_strategy_md_query DEFINITION
     "! @parameter rt_list | <p class="shorttext synchronized">Listado</p>
     METHODS get_liberation_group_list
       RETURNING VALUE(rt_list) TYPE tt_liberation_group_list.
-  PROTECTED SECTION.
-    TYPES: BEGIN OF ts_username_desc,
-             username      TYPE xubname,
-             username_desc TYPE ad_namtext,
-           END OF ts_username_desc.
-    TYPES: tt_username_desc TYPE STANDARD TABLE OF ts_username_desc WITH EMPTY KEY.
-    TYPES: BEGIN OF ts_lib_group_code,
-             group TYPE t16fw-frggr,
-             code  TYPE t16fw-frgco,
-           END OF ts_lib_group_code.
-    TYPES: tt_lib_group_code TYPE STANDARD TABLE OF ts_lib_group_code WITH DEFAULT KEY.
-    TYPES: BEGIN OF ts_lib_group_strategy,
-             group    TYPE t16fs-frggr,
-             strategy TYPE t16fs-frgsx,
-           END OF ts_lib_group_strategy.
-    TYPES: tt_lib_group_strategy TYPE STANDARD TABLE OF ts_lib_group_strategy WITH DEFAULT KEY.
-    TYPES: BEGIN OF ts_depart_group_strategy,
-             purchase_group      TYPE ekgrp,
-             purchase_group_desc TYPE eknam.
-        INCLUDE TYPE ts_lib_group_strategy.
-    TYPES:
-               END OF ts_depart_group_strategy.
-    TYPES: tt_depart_group_strategy TYPE STANDARD TABLE OF ts_depart_group_strategy WITH EMPTY KEY.
-    TYPES: BEGIN OF ts_strategy_approvers.
-        INCLUDE TYPE ts_strategy_code_approvers.
-        INCLUDE TYPE ts_username_desc.
-    TYPES: END   OF ts_strategy_approvers.
-    TYPES: tt_strategy_approvers TYPE STANDARD TABLE OF ts_strategy_approvers WITH DEFAULT KEY.
-    DATA mv_langu TYPE sylangu.
-    DATA mt_username_desc TYPE tt_username_desc.
-
-
-
-
-    "! <p class="shorttext synchronized">Devuelve los aprobadores de estrategia a por grupo</p>
+    "! <p class="shorttext synchronized">Devuelve los aprobadores de estrategia a por grupo liberación</p>
     "! @parameter it_group_code | <p class="shorttext synchronized">Grupo y codigos de liberación</p>
     "! @parameter iv_filter_lib_code | <p class="shorttext synchronized">Filtra los registros del codigo de liberación</p>
     "! @parameter et_strategy | <p class="shorttext synchronized">Aprobadores de la estrategia</p>
@@ -349,6 +360,68 @@ CLASS zcl_rel_strategy_md_query DEFINITION
         iv_filter_lib_code TYPE sap_bool DEFAULT abap_false
       EXPORTING
         et_approvers       TYPE tt_strategy_approvers.
+    "! <p class="shorttext synchronized">Devuelve los maestros de grupo de compra</p>
+    "! @parameter rt_values | <p class="shorttext synchronized">Valores</p>
+    METHODS get_purchase_group_list
+      RETURNING VALUE(rt_values) TYPE tt_purchase_group_list.
+    "! <p class="shorttext synchronized">Devuelve los maestros de codigo de liberación</p>
+    "! @parameter rt_values | <p class="shorttext synchronized">Valores</p>
+    METHODS get_code_liberation_list
+      RETURNING VALUE(rt_values) TYPE tt_code_liberation_list.
+    "! <p class="shorttext synchronized">Búsqueda de estrategias por multiples campos</p>
+    "! @parameter it_r_buyers | <p class="shorttext synchronized">Compradores</p>
+    "! @parameter it_r_approvers | <p class="shorttext synchronized">Aprobadores</p>
+    "! @parameter it_r_purchase_group | <p class="shorttext synchronized">Grupos de compra</p>
+    "! @parameter it_r_group | <p class="shorttext synchronized">Grupo de liberación</p>
+    "! @parameter it_r_code | <p class="shorttext synchronized">Código de liberación</p>
+    "! @parameter it_group_code_lib | <p class="shorttext synchronized">Combinacion de grupos y código</p>
+    "! @parameter et_purchase_group | <p class="shorttext synchronized">Grupos de compra y departamentos</p>
+    "! @parameter et_strategy_data | <p class="shorttext synchronized">Datos de la estrategia</p>
+    "! @parameter et_buyer_purchase_group | <p class="shorttext synchronized">Compradores del grupo de compras</p>
+    METHODS search_multiple_values
+      IMPORTING
+        it_r_buyers             TYPE zif_rel_data=>tt_r_username OPTIONAL
+        it_r_approvers          TYPE zif_rel_data=>tt_r_username OPTIONAL
+        it_r_purchase_group     TYPE zif_rel_data=>tt_r_purchase_group OPTIONAL
+        it_r_group              TYPE zif_rel_data=>tt_r_liberation_group OPTIONAL
+        it_r_code               TYPE zif_rel_data=>tt_r_liberation_code OPTIONAL
+        it_group_code_lib       TYPE tt_filter_liberation_code OPTIONAL
+      EXPORTING
+        et_purchase_group       TYPE tt_dept_purchase_group
+        et_strategy_data        TYPE zif_rel_data=>tt_pgroup_strategy_data
+        et_buyer_purchase_group TYPE zif_rel_data=>tt_users_purchase_group  .
+
+  PROTECTED SECTION.
+
+    TYPES: BEGIN OF ts_lib_group_strategy,
+             group    TYPE t16fs-frggr,
+             strategy TYPE t16fs-frgsx,
+           END OF ts_lib_group_strategy.
+    TYPES: tt_lib_group_strategy TYPE STANDARD TABLE OF ts_lib_group_strategy WITH DEFAULT KEY.
+    TYPES: BEGIN OF ts_depart_group_strategy,
+             purchase_group      TYPE ekgrp,
+             purchase_group_desc TYPE eknam.
+             INCLUDE TYPE ts_lib_group_strategy.
+           TYPES:
+                  END OF ts_depart_group_strategy.
+    TYPES: tt_depart_group_strategy TYPE STANDARD TABLE OF ts_depart_group_strategy WITH EMPTY KEY.
+    TYPES: BEGIN OF ts_search_mult_values_data,
+             dept_subs      TYPE zrel_i_stg1_strategy_data-dept_subs,
+             dept_subs_desc TYPE zrel_i_stg1_strategy_data-dept_subs_desc,
+             pgroup         TYPE zrel_i_stg1_strategy_data-pgroup,
+             pgroup_desc    TYPE zrel_i_stg1_strategy_data-pgroup_desc,
+             approver_code  TYPE zrel_i_stg1_strategy_data-approver_code,
+             group_lib      TYPE zrel_i_stg1_strategy_data-group_lib,
+           END OF ts_search_mult_values_data.
+    TYPES: tt_search_mult_values_data TYPE STANDARD TABLE OF ts_search_mult_values_data WITH EMPTY KEY.
+
+    DATA mv_langu TYPE sylangu.
+    DATA mt_username_desc TYPE tt_username_desc.
+
+
+
+
+
     "! <p class="shorttext synchronized">Devuelve los aprobadores de una estrategia</p>
     "! @parameter it_group_strag | <p class="shorttext synchronized">Grupo y estrategia a buscar los datos</p>
     "! @parameter iv_filter_lib_code | <p class="shorttext synchronized">Filtra los registros del codigo de liberación</p>
@@ -370,7 +443,19 @@ CLASS zcl_rel_strategy_md_query DEFINITION
         it_r_purchase_group TYPE zif_rel_data=>tt_r_purchase_group
         iv_get_desc         TYPE sap_bool DEFAULT abap_true
       EXPORTING
-        et_group_strag      TYPE tt_depart_group_strategy.
+        et_group_strag      TYPE tt_depart_group_strategy .
+    "! <p class="shorttext synchronized">Devuelve importe de la estrategia a partir del grupo de compras</p>
+    "! @parameter iv_purchase_group | <p class="shorttext synchronized">Grupo de compras</p>
+    "! @parameter it_r_purchase_group | <p class="shorttext synchronized">Rango grupo de compras</p>
+    "! @parameter et_group_strag | <p class="shorttext synchronized">Grupos y estrategias por departamento</p>
+    "! @parameter et_strategy_amount | <p class="shorttext synchronized">Importes del grupo de compras en el sistema clasificacion</p>
+    METHODS get_strag_amount_from_pgroup
+      IMPORTING
+        iv_purchase_group   TYPE ekgrp
+        it_r_purchase_group TYPE zif_rel_data=>tt_r_purchase_group
+      EXPORTING
+        et_group_strag      TYPE tt_depart_group_strategy
+        et_strategy_amount  TYPE tt_strategy_amount  .
     "! <p class="shorttext synchronized">Completa las descripciones de los códigos de liberación</p>
     "! Se hace para aquellos usuarios que ya no existen salgan con una denominación. Porque suele
     "! estar en la tabla de denominaciones
@@ -391,6 +476,14 @@ CLASS zcl_rel_strategy_md_query DEFINITION
     METHODS get_depart_from_users_auth
       IMPORTING iv_user      TYPE syuname
       EXPORTING et_dept_subs TYPE tt_user_depart_subs.
+    "! <p class="shorttext synchronized">Proceso posterior a la búsqueda multiple de datos</p>
+    "! @parameter it_group_code_lib | <p class="shorttext synchronized">Grupo y código liberación</p>
+    "! @parameter ct_data | <p class="shorttext synchronized">Datos de la búsqueda</p>
+    METHODS post_search_multiple_values
+      IMPORTING
+        it_group_code_lib TYPE zcl_rel_strategy_md_query=>tt_filter_liberation_code OPTIONAL
+      CHANGING
+        ct_data           TYPE zcl_rel_strategy_md_query=>tt_search_mult_values_data.
 
   PRIVATE SECTION.
 ENDCLASS.
@@ -578,87 +671,106 @@ CLASS zcl_rel_strategy_md_query IMPLEMENTATION.
 
   METHOD get_pgroup_strategy_from_users.
     DATA lt_r_ekgrp TYPE RANGE OF ekgrp.
+    DATA lt_r_username TYPE zif_rel_data=>tt_r_username.
 
-    " Primero tenemos que saber en que grupos de liberación esta el usuario
-    get_liberation_code_from_user( EXPORTING iv_user = iv_user
-                                         it_r_users = it_r_users
-                                         iv_get_desc = iv_get_desc
-                               IMPORTING et_user_lib_group = DATA(lt_user_lib_group) ).
+    CLEAR: et_purchase_group.
 
-    " Si hay datos hay que sacar para que estrategías de liberación esta asignado el código de liberación
-    IF lt_user_lib_group IS NOT INITIAL.
-
-      " Pasamos los datos a una tabla para poder buscar las estrategias asociadas
-      DATA(lt_lib_group_code) = CORRESPONDING tt_lib_group_code( lt_user_lib_group ).
-      SORT lt_lib_group_code.
-      DELETE ADJACENT DUPLICATES FROM lt_lib_group_code COMPARING ALL FIELDS.
-
-      " Ahora sacamos las estrategias.
-      get_approv_strat_from_group(
-        EXPORTING
-          it_group_code = lt_lib_group_code
-          iv_filter_lib_code = abap_true " Para que me devuelve las líneas con los códigos pasados
-        IMPORTING
-          et_approvers   = DATA(lt_strategy) ).
-
-      IF lt_strategy IS NOT INITIAL.
-        " Los grupos de compras están en el sistema de clasificación
-        query_classification(
-          EXPORTING
-            it_params_sl = VALUE #( FOR <wa> IN lt_strategy ( selname = zif_rel_data=>cs_strategy-classification-query-fields-objek
-                                                              kind = 'S'
-                                                              sign = 'I'
-                                                              option = 'EQ'
-                                                              low = |{ <wa>-group }{ <wa>-strategy }| ) )
-          IMPORTING
-            et_data      = DATA(lt_classif_data) ).
-
-        " Si se han encontrado datos hay que comenzar a montar los datos de salida
-        IF lt_classif_data IS NOT INITIAL.
-          " Leemos los grupos de compra obtenidos.
-          LOOP AT lt_classif_data ASSIGNING FIELD-SYMBOL(<ls_classif_data>) WHERE atinn = zif_rel_data=>cs_strategy-classification-fields_charac-ekgrp.
-
-            " Leemos las estrategias asociadas a los grupos de compra. Que como hemos filtrado para que nos devuelva los codigos que le pasamos solo habrá
-            " los registros que nos interesa.
-            LOOP AT lt_strategy ASSIGNING FIELD-SYMBOL(<ls_strategy>) WHERE group = <ls_classif_data>-objek(2)
-                                                                            AND strategy = <ls_classif_data>-objek+2(2).
-
-              READ TABLE lt_user_lib_group ASSIGNING FIELD-SYMBOL(<ls_user_lib_group>)
-                                           WITH KEY group = <ls_strategy>-group
-                                                    code = <ls_strategy>-code.
-              IF sy-subrc = 0.
-                " Solo quiero registros únicos por ello miro si ya he insertado el registro previamente.
-                READ TABLE et_purchase_group TRANSPORTING NO FIELDS WITH KEY username = <ls_user_lib_group>-username
-                                                                             purchase_group = <ls_classif_data>-value.
-                IF sy-subrc NE 0.
-                  INSERT VALUE #( username = <ls_user_lib_group>-username
-                                  username_desc = <ls_user_lib_group>-username_desc
-                                  purchase_group = <ls_classif_data>-value ) INTO TABLE et_purchase_group.
-                  " Paso el grupo de compras a un ranges para buscar la descripción, en caso necesario.
-                  INSERT VALUE #( sign = 'I' option = 'EQ' low = <ls_classif_data>-value ) INTO TABLE lt_r_ekgrp.
-                ENDIF.
-              ENDIF.
-            ENDLOOP.
-          ENDLOOP.
-
-          " Se buscan las descripciones de los grupos de compra
-          IF iv_get_desc = abap_true AND lt_r_ekgrp IS NOT INITIAL.
-            SELECT ekgrp, eknam INTO TABLE @DATA(lt_grp_compra)
-                    FROM t024
-                    WHERE ekgrp IN @lt_r_ekgrp.
-
-            LOOP AT et_purchase_group ASSIGNING FIELD-SYMBOL(<ls_purchase_group>).
-              READ TABLE lt_grp_compra ASSIGNING FIELD-SYMBOL(<ls_grp_compra>) WITH KEY ekgrp = <ls_purchase_group>-purchase_group.
-              IF sy-subrc = 0.
-                <ls_purchase_group>-purchase_group_desc = <ls_grp_compra>-eknam.
-              ENDIF.
-            ENDLOOP.
-          ENDIF.
-
-        ENDIF.
-      ENDIF.
-
+    IF iv_user IS NOT INITIAL.
+      INSERT VALUE #( sign = 'I' option = 'EQ' low = iv_user ) INTO TABLE lt_r_username.
+    ELSE.
+      lt_r_username = it_r_users.
     ENDIF.
+
+
+    SELECT DISTINCT username, username_desc, pgroup AS purchase_group, pgroup_desc AS purchase_group_desc
+           FROM zrel_i_stg0_strategy_data( langu = @mv_langu )
+           WHERE username IN @lt_r_username
+           INTO CORRESPONDING FIELDS OF TABLE @et_purchase_group.
+    LOOP AT et_purchase_group ASSIGNING FIELD-SYMBOL(<ls_purchase_group>).
+      <ls_purchase_group>-username_desc_search = |{ <ls_purchase_group>-username_desc CASE = UPPER }|.
+    ENDLOOP.
+
+
+*    " Primero tenemos que saber en que grupos de liberación esta el usuario
+*    get_liberation_code_from_user( EXPORTING iv_user = iv_user
+*                                         it_r_users = it_r_users
+*                                         iv_get_desc = iv_get_desc
+*                               IMPORTING et_user_lib_group = DATA(lt_user_lib_group) ).
+*
+*    " Si hay datos hay que sacar para que estrategías de liberación esta asignado el código de liberación
+*    IF lt_user_lib_group IS NOT INITIAL.
+*
+*      " Pasamos los datos a una tabla para poder buscar las estrategias asociadas
+*      DATA(lt_lib_group_code) = CORRESPONDING tt_lib_group_code( lt_user_lib_group ).
+*      SORT lt_lib_group_code.
+*      DELETE ADJACENT DUPLICATES FROM lt_lib_group_code COMPARING ALL FIELDS.
+*
+*      " Ahora sacamos las estrategias.
+*      get_approv_strat_from_group(
+*        EXPORTING
+*          it_group_code = lt_lib_group_code
+*          iv_filter_lib_code = abap_true " Para que me devuelve las líneas con los códigos pasados
+*        IMPORTING
+*          et_approvers   = DATA(lt_strategy) ).
+*
+*      IF lt_strategy IS NOT INITIAL.
+*        " Los grupos de compras están en el sistema de clasificación
+*        query_classification(
+*          EXPORTING
+*            it_params_sl = VALUE #( FOR <wa> IN lt_strategy ( selname = zif_rel_data=>cs_strategy-classification-query-fields-objek
+*                                                              kind = 'S'
+*                                                              sign = 'I'
+*                                                              option = 'EQ'
+*                                                              low = |{ <wa>-group }{ <wa>-strategy }| ) )
+*          IMPORTING
+*            et_data      = DATA(lt_classif_data) ).
+*
+*        " Si se han encontrado datos hay que comenzar a montar los datos de salida
+*        IF lt_classif_data IS NOT INITIAL.
+*          " Leemos los grupos de compra obtenidos.
+*          LOOP AT lt_classif_data ASSIGNING FIELD-SYMBOL(<ls_classif_data>) WHERE atinn = zif_rel_data=>cs_strategy-classification-fields_charac-ekgrp.
+*
+*            " Leemos las estrategias asociadas a los grupos de compra. Que como hemos filtrado para que nos devuelva los codigos que le pasamos solo habrá
+*            " los registros que nos interesa.
+*            LOOP AT lt_strategy ASSIGNING FIELD-SYMBOL(<ls_strategy>) WHERE group = <ls_classif_data>-objek(2)
+*                                                                            AND strategy = <ls_classif_data>-objek+2(2).
+*
+*              READ TABLE lt_user_lib_group ASSIGNING FIELD-SYMBOL(<ls_user_lib_group>)
+*                                           WITH KEY group = <ls_strategy>-group
+*                                                    code = <ls_strategy>-code.
+*              IF sy-subrc = 0.
+*                " Solo quiero registros únicos por ello miro si ya he insertado el registro previamente.
+*                READ TABLE et_purchase_group TRANSPORTING NO FIELDS WITH KEY username = <ls_user_lib_group>-username
+*                                                                             purchase_group = <ls_classif_data>-value.
+*                IF sy-subrc NE 0.
+*                  INSERT VALUE #( username = <ls_user_lib_group>-username
+*                                  username_desc = <ls_user_lib_group>-username_desc
+*                                  purchase_group = <ls_classif_data>-value ) INTO TABLE et_purchase_group.
+*                  " Paso el grupo de compras a un ranges para buscar la descripción, en caso necesario.
+*                  INSERT VALUE #( sign = 'I' option = 'EQ' low = <ls_classif_data>-value ) INTO TABLE lt_r_ekgrp.
+*                ENDIF.
+*              ENDIF.
+*            ENDLOOP.
+*          ENDLOOP.
+*
+*          " Se buscan las descripciones de los grupos de compra
+*          IF iv_get_desc = abap_true AND lt_r_ekgrp IS NOT INITIAL.
+*            SELECT ekgrp, eknam INTO TABLE @DATA(lt_grp_compra)
+*                    FROM t024
+*                    WHERE ekgrp IN @lt_r_ekgrp.
+*
+*            LOOP AT et_purchase_group ASSIGNING FIELD-SYMBOL(<ls_purchase_group>).
+*              READ TABLE lt_grp_compra ASSIGNING FIELD-SYMBOL(<ls_grp_compra>) WITH KEY ekgrp = <ls_purchase_group>-purchase_group.
+*              IF sy-subrc = 0.
+*                <ls_purchase_group>-purchase_group_desc = <ls_grp_compra>-eknam.
+*              ENDIF.
+*            ENDLOOP.
+*          ENDIF.
+*
+*        ENDIF.
+*      ENDIF.
+*
+*    ENDIF.
 
   ENDMETHOD.
 
@@ -673,31 +785,41 @@ CLASS zcl_rel_strategy_md_query IMPLEMENTATION.
       lt_r_username = it_r_users.
     ENDIF.
 
+    SELECT 'E' AS sign, 'EQ' AS option, frggr AS low, frggr AS high
+                INTO TABLE @DATA(lt_r_excl_group)
+                FROM zrel_t025.
 
-    SELECT objid AS username frggr AS group frgco AS code INTO CORRESPONDING FIELDS OF TABLE et_user_lib_group
-           FROM t16fw
-           WHERE objid IN lt_r_username
-                 AND otype = zif_rel_data=>cs_strategy-master_data-otype_usersap.
+    SELECT username, username_desc, group_lib AS group, code
+           INTO TABLE @et_user_lib_group
+           FROM zrel_i_code_approv_username( langu = @mv_langu )
+           WHERE username IN @lt_r_username
+                 AND group_lib IN @lt_r_excl_group.
 
-    IF sy-subrc = 0.
 
-      " Leemos los grupos de liberación que se tienen que excluir del proceso.
-      SELECT 'I' AS sign, 'EQ' AS option, frggr AS low, frggr AS high
-            INTO TABLE @DATA(lt_r_excl_group)
-            FROM zrel_t025.
-      IF sy-subrc = 0.
-        DELETE et_user_lib_group WHERE group IN lt_r_excl_group.
-      ENDIF.
-
-      " Saco las descripciones si se ha indicado
-      IF iv_get_desc = abap_true AND et_user_lib_group IS NOT INITIAL.
-
-        " Se completan las descripciones de aquellos códigos que no tengan descripción de usuario
-        complete_lib_code_desc( CHANGING ct_user_lib_group = et_user_lib_group ).
-
-      ENDIF.
-
-    ENDIF.
+*    SELECT objid AS username frggr AS group frgco AS code INTO CORRESPONDING FIELDS OF TABLE et_user_lib_group
+*           FROM t16fw
+*           WHERE objid IN lt_r_username
+*                 AND otype = zif_rel_data=>cs_strategy-master_data-otype_usersap.
+*
+*    IF sy-subrc = 0.
+*
+*      " Leemos los grupos de liberación que se tienen que excluir del proceso.
+*      SELECT 'I' AS sign, 'EQ' AS option, frggr AS low, frggr AS high
+*            INTO TABLE @DATA(lt_r_excl_group)
+*            FROM zrel_t025.
+*      IF sy-subrc = 0.
+*        DELETE et_user_lib_group WHERE group IN lt_r_excl_group.
+*      ENDIF.
+*
+*      " Saco las descripciones si se ha indicado
+*      IF iv_get_desc = abap_true AND et_user_lib_group IS NOT INITIAL.
+*
+*        " Se completan las descripciones de aquellos códigos que no tengan descripción de usuario
+*        complete_lib_code_desc( CHANGING ct_user_lib_group = et_user_lib_group ).
+*
+*      ENDIF.
+*
+*    ENDIF.
 
   ENDMETHOD.
 
@@ -709,68 +831,100 @@ CLASS zcl_rel_strategy_md_query IMPLEMENTATION.
     " añadir el filtro de codigo de liberación.
     DATA(lt_r_group) = VALUE zif_rel_data=>tt_r_liberation_group( FOR <wa> IN it_group_code ( sign = 'I' option = 'EQ' low = <wa>-group ) ).
 
-    " Saco los datos en bruto de las estrategias de liberacion
-    SELECT * INTO TABLE @DATA(lt_t16fs)
-          FROM t16fs
-          WHERE frggr IN @lt_r_group.
-    IF sy-subrc = 0.
+    SELECT  group_lib AS group, strategy, strategy_level AS level, approver_code AS code,
+            username, username_desc
+          FROM zrel_i_stg1_strategy_approvers( langu = @mv_langu )
+          WHERE group_lib IN @lt_r_group
+          INTO TABLE @DATA(lt_approvers).
 
-      " Se recorren los registros para añadir a la tabla de datos. La tabla
-      " se devolverá un registro por aprobador, por ello hay que pivotar los
-      " campos de los aprobadores en registros.
-      LOOP AT lt_t16fs ASSIGNING FIELD-SYMBOL(<ls_t16fs>).
-        DATA(lt_strategy) = convert_t16fs_row_data( EXPORTING is_t16fs = <ls_t16fs> ).
-
-        " Monto un ranges con los codigos de liberación que se quieren filtrar por codigo de liberación
-        DATA(lt_r_code) = VALUE zif_rel_data=>tt_r_liberation_code( FOR <wa1> IN it_group_code WHERE ( group = <ls_t16fs>-frggr
-                                                                                                       AND code NE '' )
-                                                                                               ( sign = 'I' option = 'EQ' low = <wa1>-code ) ).
-
-        " Me guardo los codigos de liberación para luego poder buscar los usuarios asociados.
-        INSERT LINES OF lt_r_code INTO TABLE lt_r_code_all.
-
-        " Si se marca que se filtran por código de liberación, entonces solo entrarán aquellas líneas que tengan el código de liberación
-        " pasado.
-        IF iv_filter_lib_code = abap_true.
-          LOOP AT lt_strategy ASSIGNING FIELD-SYMBOL(<ls_strategy>) WHERE code IN lt_r_code.
-            INSERT CORRESPONDING #( <ls_strategy> ) INTO TABLE et_approvers.
-          ENDLOOP.
-        ELSE.
-          " Si no se quiere filtrar por código de liberación, miro si la estrategia tiene alguno de los codigos pasados.
-          " Si es así, entonces entran todos.
-          LOOP AT lt_strategy TRANSPORTING NO FIELDS WHERE code IN lt_r_code.
-            EXIT.
-          ENDLOOP.
-          IF sy-subrc = 0.
-            et_approvers = CORRESPONDING #( BASE ( et_approvers ) lt_strategy ).
-          ENDIF.
-        ENDIF.
-      ENDLOOP.
-
-      IF et_approvers IS NOT INITIAL.
-        " Ahora saco los usuarios asociados a los códigos
-        get_users_from_lib_group_code(
-          EXPORTING
-            it_r_code         = lt_r_code_all
-            it_r_group        = lt_r_group
-          IMPORTING
-            et_user_lib_group = DATA(lt_user_lib_group) ).
-
-        IF lt_user_lib_group IS NOT INITIAL.
-          LOOP AT et_approvers ASSIGNING FIELD-SYMBOL(<ls_approvers>).
-            READ TABLE lt_user_lib_group ASSIGNING FIELD-SYMBOL(<ls_user_lib_group>)
-                                         WITH KEY code = <ls_approvers>-code
-                                                  group = <ls_approvers>-group.
-            IF sy-subrc = 0.
-              <ls_approvers>-username = <ls_user_lib_group>-username.
-              <ls_approvers>-username_desc = <ls_user_lib_group>-username_desc.
-            ENDIF.
-
+    LOOP AT lt_approvers ASSIGNING FIELD-SYMBOL(<ls_approvers_dummy>)
+                        GROUP BY ( group = <ls_approvers_dummy>-group )
+                        ASSIGNING FIELD-SYMBOL(<group>).
+      DATA(lt_r_code) = VALUE zif_rel_data=>tt_r_liberation_code( FOR <wa1> IN it_group_code
+                                                                  WHERE ( group = <group>-group
+                                                                          AND code NE '' )
+                                                                  ( sign = 'I' option = 'EQ' low = <wa1>-code ) ).
+      IF iv_filter_lib_code = abap_true.
+        LOOP AT GROUP <group> ASSIGNING FIELD-SYMBOL(<ls_approvers>) WHERE code IN lt_r_code.
+          INSERT CORRESPONDING #( <ls_approvers> ) INTO TABLE et_approvers.
+        ENDLOOP.
+      ELSE.
+        " Si no se quiere filtrar por código de liberación, miro si la estrategia tiene alguno de los codigos pasados.
+        " Si es así, entonces entran todos.
+        LOOP AT GROUP <group> ASSIGNING <ls_approvers> WHERE code IN lt_r_code.
+          EXIT.
+        ENDLOOP.
+        IF sy-subrc = 0.
+          LOOP AT GROUP <group> ASSIGNING <ls_approvers>.
+            INSERT CORRESPONDING #( <ls_approvers> ) INTO TABLE et_approvers.
           ENDLOOP.
         ENDIF.
       ENDIF.
+    ENDLOOP.
 
-    ENDIF.
+
+*    " Saco los datos en bruto de las estrategias de liberacion
+*    SELECT * INTO TABLE @DATA(lt_t16fs)
+*          FROM t16fs
+*          WHERE frggr IN @lt_r_group.
+*    IF sy-subrc = 0.
+*
+*      " Se recorren los registros para añadir a la tabla de datos. La tabla
+*      " se devolverá un registro por aprobador, por ello hay que pivotar los
+*      " campos de los aprobadores en registros.
+*      LOOP AT lt_t16fs ASSIGNING FIELD-SYMBOL(<ls_t16fs>).
+*        DATA(lt_strategy) = convert_t16fs_row_data( EXPORTING is_t16fs = <ls_t16fs> ).
+*
+*        " Monto un ranges con los codigos de liberación que se quieren filtrar por codigo de liberación
+*        DATA(lt_r_code) = VALUE zif_rel_data=>tt_r_liberation_code( FOR <wa1> IN it_group_code WHERE ( group = <ls_t16fs>-frggr
+*                                                                                                       AND code NE '' )
+*                                                                                               ( sign = 'I' option = 'EQ' low = <wa1>-code ) ).
+*
+*        " Me guardo los codigos de liberación para luego poder buscar los usuarios asociados.
+*        INSERT LINES OF lt_r_code INTO TABLE lt_r_code_all.
+*
+*        " Si se marca que se filtran por código de liberación, entonces solo entrarán aquellas líneas que tengan el código de liberación
+*        " pasado.
+*        IF iv_filter_lib_code = abap_true.
+*          LOOP AT lt_strategy ASSIGNING FIELD-SYMBOL(<ls_strategy>) WHERE code IN lt_r_code.
+*            INSERT CORRESPONDING #( <ls_strategy> ) INTO TABLE et_approvers.
+*          ENDLOOP.
+*        ELSE.
+*          " Si no se quiere filtrar por código de liberación, miro si la estrategia tiene alguno de los codigos pasados.
+*          " Si es así, entonces entran todos.
+*          LOOP AT lt_strategy TRANSPORTING NO FIELDS WHERE code IN lt_r_code.
+*            EXIT.
+*          ENDLOOP.
+*          IF sy-subrc = 0.
+*            et_approvers = CORRESPONDING #( BASE ( et_approvers ) lt_strategy ).
+*          ENDIF.
+*        ENDIF.
+*      ENDLOOP.
+*
+*      IF et_approvers IS NOT INITIAL.
+*        " Ahora saco los usuarios asociados a los códigos
+*        get_users_from_lib_group_code(
+*          EXPORTING
+*            it_r_code         = lt_r_code_all
+*            it_r_group        = lt_r_group
+*          IMPORTING
+*            et_user_lib_group = DATA(lt_user_lib_group) ).
+*
+*        IF lt_user_lib_group IS NOT INITIAL.
+*          LOOP AT et_approvers ASSIGNING FIELD-SYMBOL(<ls_approvers>).
+*            READ TABLE lt_user_lib_group ASSIGNING FIELD-SYMBOL(<ls_user_lib_group>)
+*                                         WITH KEY code = <ls_approvers>-code
+*                                                  group = <ls_approvers>-group.
+*            IF sy-subrc = 0.
+*              <ls_approvers>-username = <ls_user_lib_group>-username.
+*              <ls_approvers>-username_desc = <ls_user_lib_group>-username_desc.
+*            ENDIF.
+*
+*          ENDLOOP.
+*        ENDIF.
+*      ENDIF.
+*
+*    ENDIF.
 
 
   ENDMETHOD.
@@ -866,13 +1020,19 @@ CLASS zcl_rel_strategy_md_query IMPLEMENTATION.
     ENDIF.
 
 
-    SELECT a~dept_subs, c~description AS dept_subs_desc, a~ekgrp AS purchase_group, b~eknam AS purchase_group_desc  INTO TABLE @et_purchase_group
-           FROM zrel_t003 AS a INNER JOIN t024 AS b ON
-                b~ekgrp = a~ekgrp LEFT OUTER JOIN zrel_t002t AS c ON
-                c~dept_subs = a~dept_subs
-                AND c~spras = @mv_langu
-           WHERE a~dept_subs IN @lt_r_dept_subs
-           ORDER BY a~dept_subs, a~ekgrp.
+*    SELECT a~dept_subs, c~description AS dept_subs_desc, a~ekgrp AS purchase_group, b~eknam AS purchase_group_desc  INTO TABLE @et_purchase_group
+*           FROM zrel_t003 AS a INNER JOIN t024 AS b ON
+*                b~ekgrp = a~ekgrp LEFT OUTER JOIN zrel_t002t AS c ON
+*                c~dept_subs = a~dept_subs
+*                AND c~spras = @mv_langu
+*           WHERE a~dept_subs IN @lt_r_dept_subs
+*           ORDER BY a~dept_subs, a~ekgrp.
+
+    SELECT dept_subs, dept_subs_desc, pgroup AS purchase_group, pgroup_desc AS purchase_group_desc
+    FROM zrel_i_dptos_pgroup( langu = @mv_langu )
+    WHERE dept_subs IN @lt_r_dept_subs
+    ORDER BY dept_subs, purchase_group
+    INTO TABLE @et_purchase_group.
 
   ENDMETHOD.
 
@@ -881,116 +1041,127 @@ CLASS zcl_rel_strategy_md_query IMPLEMENTATION.
     CLEAR: et_strategy_data.
 
     " Obtenemos el grupo y estrategía de los grupos de compra pasados por parámetro
-    get_group_strag_from_pgroup( EXPORTING iv_purchase_group = iv_purchase_group
-                                           it_r_purchase_group = it_r_purchase_group
-                                 IMPORTING et_group_strag = DATA(lt_group_strategy)  ).
+*    get_group_strag_from_pgroup( EXPORTING iv_purchase_group = iv_purchase_group
+*                                           it_r_purchase_group = it_r_purchase_group
+*                                 IMPORTING et_group_strag = DATA(lt_group_strategy) ).
 
-    IF lt_group_strategy IS NOT INITIAL.
-      " Sacamos la info completa del sistema de clasificación a partir del grupo y estrategía
-      query_classification( EXPORTING it_params_sl = VALUE #( FOR <wa1> IN lt_group_strategy ( selname = zif_rel_data=>cs_strategy-classification-query-fields-objek
-                                                        kind = 'S'
-                                                        sign = 'I'
-                                                        option = 'EQ'
-                                                        low = |{ <wa1>-group }{ <wa1>-strategy }| ) )
-                                IMPORTING et_data = DATA(lt_classif_complete) ).
-
-      " Ahora hay que sacar los aprobadores.
-      get_approvers_strategy(
-        EXPORTING
-          it_group_strag = CORRESPONDING #( lt_group_strategy )
-        IMPORTING
-          et_approvers    = DATA(lt_approvers) ).
+*    IF lt_group_strategy IS NOT INITIAL.
 
 
-      " Ahora lo combinamos todo.
-      LOOP AT lt_group_strategy ASSIGNING FIELD-SYMBOL(<ls_group_strategy_dummy>)
-                                GROUP BY ( purchase_group = <ls_group_strategy_dummy>-purchase_group )
-                                ASSIGNING FIELD-SYMBOL(<group>).
+*      " Sacamos la info completa del sistema de clasificación a partir del grupo y estrategía
+*      query_classification( EXPORTING it_params_sl = VALUE #( FOR <wa1> IN lt_group_strategy ( selname = zif_rel_data=>cs_strategy-classification-query-fields-objek
+*                                                        kind = 'S'
+*                                                        sign = 'I'
+*                                                        option = 'EQ'
+*                                                        low = |{ <wa1>-group }{ <wa1>-strategy }| ) )
+*                            IMPORTING et_data = DATA(lt_classif_complete) ).
 
-        INSERT VALUE #( purchase_group = <group>-purchase_group )
-               INTO TABLE et_strategy_data
-               ASSIGNING FIELD-SYMBOL(<ls_strategy_data>).
+    get_strag_amount_from_pgroup(
+      EXPORTING
+       iv_purchase_group = iv_purchase_group
+       it_r_purchase_group = it_r_purchase_group
+      IMPORTING
+        et_group_strag      = DATA(lt_group_strategy)
+        et_strategy_amount  = DATA(lt_strategy_amount)
+    ).
 
-        LOOP AT GROUP <group> ASSIGNING FIELD-SYMBOL(<ls_group_strategy>).
-          DATA(lv_key) = |{ <ls_group_strategy>-group }{ <ls_group_strategy>-strategy }|.
-
-          <ls_strategy_data>-purchase_group_desc = <ls_group_strategy>-purchase_group_desc.
-
-          INSERT CORRESPONDING #( <ls_group_strategy> ) INTO TABLE <ls_strategy_data>-strategies ASSIGNING FIELD-SYMBOL(<ls_strategies>).
-          " Sacamos el importe
-          READ TABLE lt_classif_complete ASSIGNING FIELD-SYMBOL(<ls_classif_complete>)
-                                         WITH KEY objek = lv_key
-                                                  atinn = zif_rel_data=>cs_strategy-classification-fields_charac-gnetw.
-          IF sy-subrc = 0.
-            <ls_strategies>-amount = <ls_classif_complete>-value_amount.
-            <ls_strategies>-amount2 = <ls_classif_complete>-value_amount2.
-            <ls_strategies>-amount_char = <ls_classif_complete>-value.
-            <ls_strategies>-amount_operand = <ls_classif_complete>-value_operand.
-            <ls_strategies>-currency = <ls_classif_complete>-value_currency.
-          ENDIF.
-
-          " Ahora los aprobadores
-          LOOP AT lt_approvers ASSIGNING FIELD-SYMBOL(<ls_approvers>) WHERE group = <ls_group_strategy>-group
-                                                                            AND strategy = <ls_group_strategy>-strategy.
-
-            INSERT CORRESPONDING #( <ls_approvers> ) INTO TABLE <ls_strategies>-approvers ASSIGNING FIELD-SYMBOL(<ls_strag_approv>).
+    " Ahora hay que sacar los aprobadores.
+    get_approvers_strategy(
+      EXPORTING
+        it_group_strag = CORRESPONDING #( lt_group_strategy )
+      IMPORTING
+        et_approvers    = DATA(lt_approvers) ).
 
 
-          ENDLOOP.
+*      " Ahora lo combinamos todo.
+    LOOP AT lt_strategy_amount ASSIGNING FIELD-SYMBOL(<ls_strategy_amount_dummy>)
+                              GROUP BY ( purchase_group = <ls_strategy_amount_dummy>-purchase_group )
+                              ASSIGNING FIELD-SYMBOL(<group>).
 
-        ENDLOOP.
-        " Ahora ordenamos las estrategias por los valores de los importes y operandos.
-        sort_strategies( CHANGING ct_strategies = <ls_strategy_data>-strategies ).
+      INSERT VALUE #( purchase_group = <group>-purchase_group
+                      purchase_group_desc = lt_strategy_amount[ purchase_group = <group>-purchase_group ]-purchase_group_desc )
+             INTO TABLE et_strategy_data
+             ASSIGNING FIELD-SYMBOL(<ls_strategy_data>).
+
+      LOOP AT GROUP <group> ASSIGNING FIELD-SYMBOL(<ls_group_strategy>).
+
+        INSERT VALUE #( group = <ls_group_strategy>-group
+                        strategy = <ls_group_strategy>-strategy
+                        amount = <ls_group_strategy>-value_amount
+                        amount2 = <ls_group_strategy>-value_amount2
+                        amount_char = <ls_group_strategy>-value
+                        amount_operand = <ls_group_strategy>-value_operand
+                        currency = <ls_group_strategy>-value_currency
+                        approvers = VALUE #( FOR <wa> IN lt_approvers
+                                             WHERE ( group = <ls_group_strategy>-group
+                                                     AND strategy = <ls_group_strategy>-strategy )
+                                             ( CORRESPONDING #( <wa> ) ) ) )
+               INTO TABLE <ls_strategy_data>-strategies.
+
+*
       ENDLOOP.
-    ENDIF.
+      " Ahora ordenamos las estrategias por los valores de los importes y operandos.
+      sort_strategies( CHANGING ct_strategies = <ls_strategy_data>-strategies ).
+    ENDLOOP.
+*    ENDIF.
 
   ENDMETHOD.
 
   METHOD get_approvers_strategy.
     DATA lt_r_group TYPE zif_rel_data=>tt_r_liberation_group.
     DATA lt_r_code TYPE zif_rel_data=>tt_r_liberation_code.
+
     CLEAR: et_approvers.
 
-    " Saco los datos en bruto de las estrategias de liberacion
-    SELECT * INTO TABLE @DATA(lt_t16fs)
-          FROM t16fs
-            FOR ALL ENTRIES IN @it_group_strag
-          WHERE frggr = @it_group_strag-group
-                AND frgsx = @it_group_strag-strategy.
-    IF sy-subrc = 0.
+    SELECT group_lib AS group, strategy, strategy_level AS level, approver_code AS code,
+           username, username_desc
+           FROM zrel_i_stg1_strategy_approvers( langu = @mv_langu )
+           FOR ALL ENTRIES IN @it_group_strag
+           WHERE group_lib = @it_group_strag-group
+                 AND strategy = @it_group_strag-strategy
+           INTO TABLE @et_approvers.
 
-      LOOP AT lt_t16fs ASSIGNING FIELD-SYMBOL(<ls_t16fs>).
-        INSERT VALUE #( sign = 'I' option = 'EQ' low = <ls_t16fs>-frggr ) INTO TABLE lt_r_group.
 
-        DATA(lt_strategy) = convert_t16fs_row_data( EXPORTING is_t16fs = <ls_t16fs> ).
-
-        lt_r_code = VALUE #( BASE lt_r_code FOR <wa> IN lt_strategy ( sign = 'I' option = 'EQ' low = <wa>-code ) ).
-
-        et_approvers = CORRESPONDING #( BASE ( et_approvers ) lt_strategy ).
-
-      ENDLOOP.
-
-      " Ahora saco los usuarios asociados a los códigos
-      get_users_from_lib_group_code(
-        EXPORTING
-          it_r_code         = lt_r_code
-          it_r_group        = lt_r_group
-        IMPORTING
-          et_user_lib_group = DATA(lt_user_lib_group) ).
-      IF lt_user_lib_group IS NOT INITIAL.
-        LOOP AT et_approvers ASSIGNING FIELD-SYMBOL(<ls_approvers>).
-          READ TABLE lt_user_lib_group ASSIGNING FIELD-SYMBOL(<ls_user_lib_group>)
-                                       WITH KEY code = <ls_approvers>-code
-                                                group = <ls_approvers>-group.
-          IF sy-subrc = 0.
-            <ls_approvers>-username = <ls_user_lib_group>-username.
-            <ls_approvers>-username_desc = <ls_user_lib_group>-username_desc.
-          ENDIF.
-
-        ENDLOOP.
-      ENDIF.
-
-    ENDIF.
+*    " Saco los datos en bruto de las estrategias de liberacion
+*    SELECT * INTO TABLE @DATA(lt_t16fs)
+*          FROM t16fs
+*            FOR ALL ENTRIES IN @it_group_strag
+*          WHERE frggr = @it_group_strag-group
+*                AND frgsx = @it_group_strag-strategy.
+*    IF sy-subrc = 0.
+*
+*      LOOP AT lt_t16fs ASSIGNING FIELD-SYMBOL(<ls_t16fs>).
+*        INSERT VALUE #( sign = 'I' option = 'EQ' low = <ls_t16fs>-frggr ) INTO TABLE lt_r_group.
+*
+*        DATA(lt_strategy) = convert_t16fs_row_data( EXPORTING is_t16fs = <ls_t16fs> ).
+*
+*        lt_r_code = VALUE #( BASE lt_r_code FOR <wa> IN lt_strategy ( sign = 'I' option = 'EQ' low = <wa>-code ) ).
+*
+*        et_approvers = CORRESPONDING #( BASE ( et_approvers ) lt_strategy ).
+*
+*      ENDLOOP.
+*
+*      " Ahora saco los usuarios asociados a los códigos
+*      get_users_from_lib_group_code(
+*        EXPORTING
+*          it_r_code         = lt_r_code
+*          it_r_group        = lt_r_group
+*        IMPORTING
+*          et_user_lib_group = DATA(lt_user_lib_group) ).
+*      IF lt_user_lib_group IS NOT INITIAL.
+*        LOOP AT et_approvers ASSIGNING FIELD-SYMBOL(<ls_approvers>).
+*          READ TABLE lt_user_lib_group ASSIGNING FIELD-SYMBOL(<ls_user_lib_group>)
+*                                       WITH KEY code = <ls_approvers>-code
+*                                                group = <ls_approvers>-group.
+*          IF sy-subrc = 0.
+*            <ls_approvers>-username = <ls_user_lib_group>-username.
+*            <ls_approvers>-username_desc = <ls_user_lib_group>-username_desc.
+*          ENDIF.
+*
+*        ENDLOOP.
+*      ENDIF.
+*
+*    ENDIF.
   ENDMETHOD.
 
 
@@ -999,32 +1170,40 @@ CLASS zcl_rel_strategy_md_query IMPLEMENTATION.
 
     CLEAR: et_group_strag.
 
+    " Leemos los grupos de liberación que se tienen que excluir
+    SELECT 'E' AS sign, 'EQ' AS option, frggr AS low, frggr AS high
+          INTO TABLE @DATA(lt_r_excl_group)
+          FROM zrel_t025.
+
+
     " Sacamos el grupo y estrategía de liberación a partir del grupo de compras
-    DATA(lt_params_sl) = VALUE pivb_rsparamsl_255_t( ( selname = zif_rel_data=>cs_strategy-classification-query-fields-atinn
-                                                       kind = 'P'
-                                                       low = zif_rel_data=>cs_strategy-classification-fields_charac-ekgrp )  ).
+*    DATA(lt_params_sl) = VALUE pivb_rsparamsl_255_t( ( selname = zif_rel_data=>cs_strategy-classification-query-fields-atinn
+*                                                       kind = 'P'
+*                                                       low = zif_rel_data=>cs_strategy-classification-fields_charac-ekgrp )  ).
 
     IF iv_purchase_group IS NOT INITIAL.
-      lt_params_sl = VALUE #( BASE lt_params_sl ( selname = zif_rel_data=>cs_strategy-classification-query-fields-atwrt
-                                                  kind = 'S'
-                                                  sign = 'I'
-                                                  option = 'EQ'
-                                                  low = iv_purchase_group ) ).
+*      lt_params_sl = VALUE #( BASE lt_params_sl ( selname = zif_rel_data=>cs_strategy-classification-query-fields-atwrt
+*                                                  kind = 'S'
+*                                                  sign = 'I'
+*                                                  option = 'EQ'
+*                                                  low = iv_purchase_group ) ).
       INSERT VALUE #( sign = 'I' option = 'EQ' low = iv_purchase_group ) INTO TABLE lt_r_ekgrp.
     ELSE.
-      lt_params_sl = VALUE #( BASE lt_params_sl FOR <wa> IN it_r_purchase_group ( selname = zif_rel_data=>cs_strategy-classification-query-fields-atwrt
-                                                  kind = 'S'
-                                                  sign = <wa>-sign
-                                                  option = <wa>-option
-                                                  low = <wa>-low
-                                                  high = <wa>-high  ) ).
+*      lt_params_sl = VALUE #( BASE lt_params_sl FOR <wa> IN it_r_purchase_group ( selname = zif_rel_data=>cs_strategy-classification-query-fields-atwrt
+*                                                  kind = 'S'
+*                                                  sign = <wa>-sign
+*                                                  option = <wa>-option
+*                                                  low = <wa>-low
+*                                                  high = <wa>-high  ) ).
       lt_r_ekgrp = it_r_purchase_group.
     ENDIF.
 
-    query_classification( EXPORTING it_params_sl = lt_params_sl
-                          IMPORTING et_data = DATA(lt_classif_pgroup) ).
+    SELECT group_lib AS group, strategy, pgroup AS purchase_group INTO CORRESPONDING FIELDS OF TABLE @et_group_strag
+           FROM zrel_i_stg0_classif_pgroup
+           WHERE pgroup IN @lt_r_ekgrp
+                 AND group_lib IN @lt_r_excl_group.
 
-    IF lt_classif_pgroup IS NOT INITIAL.
+    IF sy-subrc = 0.
 
       " Buscamos las descripciones de las grupos de compra
       IF iv_get_desc = abap_true.
@@ -1032,32 +1211,43 @@ CLASS zcl_rel_strategy_md_query IMPLEMENTATION.
                FROM t024
                WHERE ekgrp IN @lt_r_ekgrp.
 
+        LOOP AT et_group_strag ASSIGNING FIELD-SYMBOL(<ls_group_strag>).
+          TRY.
+              <ls_group_strag>-purchase_group_desc = lt_t024[ ekgrp = <ls_group_strag>-purchase_group ]-eknam.
+            CATCH cx_sy_itab_line_not_found.
+          ENDTRY.
+        ENDLOOP.
+
       ENDIF.
-
-      LOOP AT lt_classif_pgroup ASSIGNING FIELD-SYMBOL(<ls_classif_pgroup>).
-        INSERT VALUE #( group = <ls_classif_pgroup>-objek(2)
-                        strategy = <ls_classif_pgroup>-objek+2(2)
-                        purchase_group = <ls_classif_pgroup>-value ) INTO TABLE et_group_strag ASSIGNING FIELD-SYMBOL(<ls_group_strag>).
-
-        IF iv_get_desc = abap_true.
-          READ TABLE lt_t024 ASSIGNING FIELD-SYMBOL(<ls_t024>) WITH KEY ekgrp = <ls_classif_pgroup>-value.
-          IF sy-subrc = 0.
-            <ls_group_strag>-purchase_group_desc = <ls_t024>-eknam.
-          ENDIF.
-        ENDIF.
-      ENDLOOP.
-
-      " Leemos los grupos de liberación que se tienen que excluir
-      SELECT 'I' AS sign, 'EQ' AS option, frggr AS low, frggr AS high
-            INTO TABLE @DATA(lt_r_excl_group)
-            FROM zrel_t025.
-      IF sy-subrc = 0.
-        DELETE et_group_strag WHERE group IN lt_r_excl_group.
-      ENDIF.
-
 
 
     ENDIF.
+
+*    query_classification( EXPORTING it_params_sl = lt_params_sl
+*                          IMPORTING et_data = DATA(lt_classif_pgroup) ).
+
+*    IF lt_classif_pgroup IS NOT INITIAL.
+*
+
+*
+*      LOOP AT lt_classif_pgroup ASSIGNING FIELD-SYMBOL(<ls_classif_pgroup>).
+*        INSERT VALUE #( group = <ls_classif_pgroup>-objek(2)
+*                        strategy = <ls_classif_pgroup>-objek+2(2)
+*                        purchase_group = <ls_classif_pgroup>-value ) INTO TABLE et_group_strag ASSIGNING FIELD-SYMBOL(<ls_group_strag>).
+*
+*        IF iv_get_desc = abap_true.
+*          READ TABLE lt_t024 ASSIGNING FIELD-SYMBOL(<ls_t024>) WITH KEY ekgrp = <ls_classif_pgroup>-value.
+*          IF sy-subrc = 0.
+*            <ls_group_strag>-purchase_group_desc = <ls_t024>-eknam.
+*          ENDIF.
+*        ENDIF.
+*      ENDLOOP.
+
+
+
+
+
+*  ENDIF.
   ENDMETHOD.
 
   METHOD get_users_from_lib_group_code.
@@ -1076,20 +1266,26 @@ CLASS zcl_rel_strategy_md_query IMPLEMENTATION.
       lt_r_group = it_r_group.
     ENDIF.
 
-    SELECT objid AS username frggr AS group frgco AS code INTO CORRESPONDING FIELDS OF TABLE et_user_lib_group
-           FROM t16fw
-           WHERE frggr IN lt_r_group
-                 AND frgco IN lt_r_code.
+    SELECT username, username_desc, group_lib AS group, code
+           INTO TABLE @et_user_lib_group
+           FROM zrel_i_code_approv_username( langu = @mv_langu )
+           WHERE group_lib IN @lt_r_group.
 
-    IF sy-subrc = 0.
-      " Saco las descripciones si se ha indicado
-      IF iv_get_desc = abap_true.
 
-        complete_lib_code_desc( CHANGING ct_user_lib_group = et_user_lib_group ).
-
-      ENDIF.
-
-    ENDIF.
+*    SELECT objid AS username frggr AS group frgco AS code INTO CORRESPONDING FIELDS OF TABLE et_user_lib_group
+*           FROM t16fw
+*           WHERE frggr IN lt_r_group
+*                 AND frgco IN lt_r_code.
+*
+*    IF sy-subrc = 0.
+*      " Saco las descripciones si se ha indicado
+*      IF iv_get_desc = abap_true.
+*
+*        complete_lib_code_desc( CHANGING ct_user_lib_group = et_user_lib_group ).
+*
+*      ENDIF.
+*
+*    ENDIF.
 
 
   ENDMETHOD.
@@ -1300,29 +1496,33 @@ CLASS zcl_rel_strategy_md_query IMPLEMENTATION.
   METHOD get_release_group_from_pgroup.
     CLEAR: rv_group.
 
-    " Para obtenerlo lo haremos en varios pasos.
-
-    " El primer es mirar si el grupo ya esta asignado algun grupo de liberación. Para ello hay que ir al sistema de clasificación.
-    DATA(lt_params_sl) = VALUE pivb_rsparamsl_255_t( ( selname = zif_rel_data=>cs_strategy-classification-query-fields-atinn
-                                                       kind = 'P'
-                                                       low = zif_rel_data=>cs_strategy-classification-fields_charac-ekgrp )
-                                                      ( selname = zif_rel_data=>cs_strategy-classification-query-fields-atwrt
-                                                        kind = 'S'
-                                                        sign = 'I'
-                                                        option = 'EQ'
-                                                        low = iv_purchase_group )   ).
-
-    query_classification( EXPORTING it_params_sl = lt_params_sl
-                          IMPORTING et_data = DATA(lt_classif_pgroup) ).
-
-    IF lt_classif_pgroup IS NOT INITIAL.
-      rv_group = lt_classif_pgroup[ 1 ]-objek(2).
-    ELSE.
-      " No tengo el grupo en ningun grupo asignado.
-
-      " PENDIENTE DEFINIR
-
-    ENDIF.
+*    " Para obtenerlo lo haremos en varios pasos.
+*
+*    " El primer es mirar si el grupo ya esta asignado algun grupo de liberación. Para ello hay que ir al sistema de clasificación.
+*    DATA(lt_params_sl) = VALUE pivb_rsparamsl_255_t( ( selname = zif_rel_data=>cs_strategy-classification-query-fields-atinn
+*                                                       kind = 'P'
+*                                                       low = zif_rel_data=>cs_strategy-classification-fields_charac-ekgrp )
+*                                                      ( selname = zif_rel_data=>cs_strategy-classification-query-fields-atwrt
+*                                                        kind = 'S'
+*                                                        sign = 'I'
+*                                                        option = 'EQ'
+*                                                        low = iv_purchase_group )   ).
+*
+*    query_classification( EXPORTING it_params_sl = lt_params_sl
+*                          IMPORTING et_data = DATA(lt_classif_pgroup) ).
+*
+*    IF lt_classif_pgroup IS NOT INITIAL.
+*      rv_group = lt_classif_pgroup[ 1 ]-objek(2).
+*    ELSE.
+*      " No tengo el grupo en ningun grupo asignado.
+*
+*      " PENDIENTE DEFINIR
+*
+*    ENDIF.
+    SELECT group_lib INTO @rv_group UP TO 1 ROWS
+    FROM zrel_i_stg0_classif_pgroup
+    WHERE pgroup = @iv_purchase_group.
+    ENDSELECT.
 
   ENDMETHOD.
 
@@ -1381,8 +1581,6 @@ CLASS zcl_rel_strategy_md_query IMPLEMENTATION.
            WHERE objek = @lv_objectkey
                  AND klart = @zif_rel_data=>cs_strategy-classification-klart.
     ENDSELECT.
-
-
 
   ENDMETHOD.
 
@@ -1481,6 +1679,185 @@ CLASS zcl_rel_strategy_md_query IMPLEMENTATION.
                 AND b~spras = mv_langu
            WHERE a~frgkl = zif_rel_data=>cs_strategy-classification-klasse
                  AND a~frggr IN lt_r_excl.
+
+  ENDMETHOD.
+
+  METHOD get_purchase_group_list.
+    CLEAR rt_values.
+
+    SELECT a~ekgrp AS pgroup b~eknam AS pgroup_desc
+           INTO TABLE rt_values
+           FROM zrel_t003 AS a INNER JOIN
+               t024 AS b
+               ON a~ekgrp = b~ekgrp.
+    IF sy-subrc = 0.
+      LOOP AT rt_values ASSIGNING FIELD-SYMBOL(<ls_values>).
+        <ls_values>-pgroup_desc_search = |{ <ls_values>-pgroup_desc CASE = UPPER }|.
+      ENDLOOP.
+
+    ENDIF.
+  ENDMETHOD.
+
+  METHOD get_code_liberation_list.
+    DATA lv_texto_baja TYPE t16fd-frgct.
+
+    CLEAR: rt_values.
+
+    zcl_rel_constants=>obtener_constantes( EXPORTING iv_constant = 'CUSTO_TEXTO_BAJA'
+                                               IMPORTING ev_value    = lv_texto_baja ).
+
+    SELECT a~frggr AS group, a~frgco AS code, b~frgct AS code_desc, c~objid AS username
+           INTO CORRESPONDING FIELDS OF TABLE @rt_values
+           FROM t16fc AS a LEFT OUTER JOIN t16fd AS b ON
+                a~frggr = b~frggr
+                AND a~frgco = b~frgco
+                AND b~spras = @mv_langu
+                LEFT OUTER JOIN t16fw AS c ON
+                   a~frgco = c~frgco
+                   AND a~frggr = c~frggr
+           WHERE b~frgct NE @lv_texto_baja.
+    IF sy-subrc = 0.
+      LOOP AT rt_values ASSIGNING FIELD-SYMBOL(<ls_values>).
+        <ls_values>-code_desc_search = |{ <ls_values>-code_desc CASE = UPPER }|.
+      ENDLOOP.
+    ENDIF.
+
+
+  ENDMETHOD.
+
+  METHOD search_multiple_values.
+    DATA lt_data TYPE tt_search_mult_values_data.
+
+
+    DATA(lt_r_group) = VALUE zif_rel_data=>tt_r_liberation_group(  ).
+    DATA(lt_r_code) = VALUE zif_rel_data=>tt_r_liberation_code(  ).
+
+
+    CLEAR: et_buyer_purchase_group, et_purchase_group, et_strategy_data.
+
+    LOOP AT it_group_code_lib ASSIGNING FIELD-SYMBOL(<ls_liberation_code>).
+      INSERT VALUE #( sign = 'I' option = 'EQ' low = <ls_liberation_code>-code ) INTO TABLE lt_r_code.
+      INSERT VALUE #( sign = 'I' option = 'EQ' low = <ls_liberation_code>-group ) INTO TABLE lt_r_group.
+    ENDLOOP.
+
+    INSERT LINES OF it_r_code INTO TABLE lt_r_code.
+    INSERT LINES OF it_r_group INTO TABLE lt_r_group.
+
+    SELECT DISTINCT dept_subs, dept_subs_desc, pgroup, pgroup_desc,approver_code,group_lib
+           FROM zrel_i_stg1_strategy_data( langu = @mv_langu ) AS a
+           WHERE buyer IN @it_r_buyers
+                 AND group_lib IN @lt_r_group
+                 AND approver_code IN @lt_r_code
+                 AND username IN @it_r_approvers
+                 AND pgroup IN @it_r_purchase_group
+           ORDER BY dept_subs_desc, pgroup_desc
+           INTO TABLE @lt_data.
+
+    IF sy-subrc = 0.
+
+      post_search_multiple_values( EXPORTING it_group_code_lib = it_group_code_lib
+                                   CHANGING ct_data = lt_data ).
+
+      et_purchase_group = VALUE #( FOR <wa3> IN lt_data ( purchase_group = <wa3>-pgroup
+                                                         purchase_group_desc = <wa3>-pgroup_desc
+                                                         dept_subs = <wa3>-dept_subs
+                                                         dept_subs_desc = <wa3>-dept_subs_desc ) ).
+      SORT et_purchase_group.
+      DELETE ADJACENT DUPLICATES FROM et_purchase_group COMPARING ALL FIELDS.
+
+      " Datos de las estrategias
+      get_strate_data_from_pgroup(
+        EXPORTING
+          it_r_purchase_group = VALUE #( FOR <wa> IN et_purchase_group ( sign = 'I' option = 'EQ' low = <wa>-purchase_group ) )
+        IMPORTING
+          et_strategy_data    = et_strategy_data ).
+
+      " Compradores de los grupos
+      get_purchase_group_buyer(
+        EXPORTING
+          it_r_purchase_group = VALUE #( FOR <wa1> IN et_purchase_group ( sign = 'I' option = 'EQ' low = <wa1>-purchase_group  ) )
+        IMPORTING
+          et_buyer_purchase_group   = et_buyer_purchase_group ).
+
+    ENDIF.
+
+  ENDMETHOD.
+
+  METHOD get_strag_amount_from_pgroup.
+    DATA lt_r_ekgrp TYPE zif_rel_data=>tt_r_purchase_group.
+
+    CLEAR: et_group_strag, et_strategy_amount.
+
+    " Leemos los grupos de liberación que se tienen que excluir
+    SELECT 'I' AS sign, 'EQ' AS option, frggr AS low, frggr AS high
+          INTO TABLE @DATA(lt_r_excl_group)
+          FROM zrel_t025.
+
+    IF iv_purchase_group IS NOT INITIAL.
+      INSERT VALUE #( sign = 'I' option = 'EQ' low = iv_purchase_group ) INTO TABLE lt_r_ekgrp.
+    ELSE.
+      lt_r_ekgrp = it_r_purchase_group.
+    ENDIF.
+
+    SELECT * INTO TABLE @DATA(lt_amounts)
+           FROM zrel_i_strategy_amounts
+           WHERE pgroup IN @lt_r_ekgrp.
+
+    " Nota Iván: Si lo excluyo por where es más lento que hacerlo por fuera.
+    IF lt_r_excl_group IS NOT INITIAL.
+      DELETE lt_amounts WHERE group_lib IN lt_r_excl_group.
+    ENDIF.
+
+    LOOP AT lt_amounts ASSIGNING FIELD-SYMBOL(<ls_amounts_dummy>)
+                       GROUP BY ( pgroup = <ls_amounts_dummy>-pgroup
+                                  group_lib = <ls_amounts_dummy>-group_lib
+                                  strategy = <ls_amounts_dummy>-strategy )
+                       ASSIGNING FIELD-SYMBOL(<group>).
+
+      INSERT VALUE #( group = <group>-group_lib
+                      strategy = <group>-strategy
+                      purchase_group = <group>-pgroup
+                      purchase_group_desc = lt_amounts[ pgroup = <group>-pgroup ]-pgroup_desc ) INTO TABLE et_group_strag.
+
+      LOOP AT GROUP <group> ASSIGNING FIELD-SYMBOL(<ls_amounts>).
+
+        INSERT VALUE #( group = <ls_amounts>-group_lib
+                        strategy = <ls_amounts>-strategy
+                        purchase_group = <ls_amounts>-pgroup
+                        purchase_group_desc = <ls_amounts>-pgroup_desc  ) INTO TABLE et_strategy_amount ASSIGNING FIELD-SYMBOL(<ls_strategy_amount>).
+
+        zcl_rel_utilities=>ctbp_convert_value_int_to_ext(
+                   EXPORTING
+                     iv_charctinn = zif_rel_data=>cs_strategy-classification-fields_charac-gnetw
+                     iv_value_from        = <ls_amounts>-value_from
+                     iv_value_to          = <ls_amounts>-value_to
+                     iv_value_relation    = <ls_amounts>-value_relation
+                   IMPORTING
+                     ev_value_formatted   = <ls_strategy_amount>-value
+                     ev_value_amount_from = <ls_strategy_amount>-value_amount
+                     ev_value_amount_to = <ls_strategy_amount>-value_amount2
+                     ev_value_operand = <ls_strategy_amount>-value_operand
+                     ev_currency = <ls_strategy_amount>-value_currency ).
+
+      ENDLOOP.
+    ENDLOOP.
+
+  ENDMETHOD.
+
+
+  METHOD post_search_multiple_values.
+
+    " La post búsqueda es para determinados casos. Si no se cumplen se sale.
+    IF it_group_code_lib IS INITIAL. EXIT. ENDIF.
+
+    LOOP AT ct_data ASSIGNING FIELD-SYMBOL(<ls_data>).
+      DATA(lv_tabix) = sy-tabix.
+
+      " Si la combinacion de grupo y código no son iguales entonces se borra el registro.
+      IF NOT line_exists( it_group_code_lib[ group = <ls_data>-group_lib code = <ls_data>-approver_code ] ).
+        DELETE ct_data INDEX lv_tabix.
+      ENDIF.
+    ENDLOOP.
 
   ENDMETHOD.
 
