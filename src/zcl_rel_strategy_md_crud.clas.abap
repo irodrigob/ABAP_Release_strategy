@@ -430,8 +430,14 @@ CLASS zcl_rel_strategy_md_crud IMPLEMENTATION.
       IF <ls_md_st>-md_status NE zif_rel_data=>cs_strategy-master_data-change_md_status-done.
 
         " Si viene un update es simple, solo se actualiza el texto
-        IF ms_pgroup-cdchngind = zif_rel_data=>cs_strategy-change_request-change_indicator-update.
-          UPDATE t024 SET eknam = ms_pgroup-purchase_group_desc
+        IF ms_pgroup-cdchngind = zif_rel_data=>cs_strategy-change_request-change_indicator-update
+           OR ms_pgroup-cdchngind = zif_rel_data=>cs_strategy-change_request-change_indicator-delete.
+
+          DATA(lv_new_text) = COND #( WHEN ms_pgroup-cdchngind = zif_rel_data=>cs_strategy-change_request-change_indicator-update
+                                      THEN ms_pgroup-purchase_group_desc
+                                      ELSE mv_texto_baja ).
+
+          UPDATE t024 SET eknam = lv_new_text
                  WHERE ekgrp = ms_header-purchase_group.
           IF sy-subrc = 0.
             INSERT zcl_ca_utilidades=>fill_return( i_type       = zif_rel_data=>cs_msg-type_success
@@ -448,6 +454,7 @@ CLASS zcl_rel_strategy_md_crud IMPLEMENTATION.
                                                     i_langu      = mv_langu
                                                     i_message_v1 = ms_header-purchase_group ) INTO TABLE et_return.
           ENDIF.
+
         ENDIF.
 
 

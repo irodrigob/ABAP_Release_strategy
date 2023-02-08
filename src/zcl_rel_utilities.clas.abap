@@ -323,7 +323,9 @@ CLASS zcl_rel_utilities IMPLEMENTATION.
         SPLIT ev_value_formatted AT space INTO: DATA(lv_amount1) DATA(lv_operand) DATA(lv_amount2) ev_currency.
 
         WRITE ev_value_amount_from CURRENCY ev_currency TO lv_amount_char LEFT-JUSTIFIED.
-        ev_value_formatted = |{ lv_amount_char } { ev_currency } { zif_rel_data=>cs_strategy-classification-charac_sep_relation }|.
+        " Cambio del 30/01/2023 - En importes un poco grandes se pierde parcialmente la moneda en el importe hasta. Por ello no pinto la
+        " moneda en el importe desde.
+        ev_value_formatted = |{ lv_amount_char } { zif_rel_data=>cs_strategy-classification-charac_sep_relation }|.
         WRITE ev_value_amount_to CURRENCY ev_currency TO lv_amount_char LEFT-JUSTIFIED.
         ev_value_formatted = |{ ev_value_formatted } { lv_amount_char } { ev_currency }|.
 
@@ -394,7 +396,9 @@ CLASS zcl_rel_utilities IMPLEMENTATION.
     IF iv_operand = '-'. " Intervalo.
 
       WRITE iv_amount CURRENCY iv_currency TO lv_amount_char LEFT-JUSTIFIED.
-      rv_amount_char = |{ lv_amount_char } { iv_currency } { iv_operand }|.
+      " Cambio del 30/01/2023 - En importes un poco grandes se pierde parcialmente la moneda en el importe hasta. Esto provoca que la función
+      " de SAP que convierte el char al formato interno. Por ello no pinto la moneda en el importe desde.
+      rv_amount_char = |{ lv_amount_char } { iv_operand }|.
       WRITE iv_amount2 CURRENCY iv_currency TO lv_amount_char LEFT-JUSTIFIED.
       rv_amount_char = |{ rv_amount_char } { lv_amount_char } { iv_currency }|.
 
