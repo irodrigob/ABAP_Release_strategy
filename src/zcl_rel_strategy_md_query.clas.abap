@@ -119,7 +119,12 @@ CLASS zcl_rel_strategy_md_query DEFINITION
             group TYPE t16fs-frggr,
             code  TYPE t16fw-frgco,
           END OF ts_filter_liberation_code.
-    TYPES: tt_filter_liberation_code TYPE STANDARD TABLE OF ts_filter_liberation_code WITH EMPTY KEY.
+    TYPES: tt_filter_liberation_code TYPE STANDARD TABLE OF ts_filter_liberation_code WITH EMPTY KEY,
+           BEGIN OF ts_lib_group_strategy,
+             group    TYPE t16fs-frggr,
+             strategy TYPE t16fs-frgsx,
+           END OF ts_lib_group_strategy,
+           tt_lib_group_strategy TYPE STANDARD TABLE OF ts_lib_group_strategy WITH DEFAULT KEY.
     "! <p class="shorttext synchronized">CONSTRUCTOR</p>
     "! @parameter iv_langu | <p class="shorttext synchronized">Idioma</p>
     METHODS constructor
@@ -390,14 +395,19 @@ CLASS zcl_rel_strategy_md_query DEFINITION
         et_purchase_group       TYPE tt_dept_purchase_group
         et_strategy_data        TYPE zif_rel_data=>tt_pgroup_strategy_data
         et_buyer_purchase_group TYPE zif_rel_data=>tt_users_purchase_group  .
+    "! <p class="shorttext synchronized">Devuelve los aprobadores de una estrategia</p>
+    "! @parameter it_group_strag | <p class="shorttext synchronized">Grupo y estrategia a buscar los datos</p>
+    "! @parameter iv_filter_lib_code | <p class="shorttext synchronized">Filtra los registros del codigo de liberación</p>
+    "! @parameter et_strategy | <p class="shorttext synchronized">Aprobadores de la estrategia</p>
+    METHODS get_approvers_strategy
+      IMPORTING
+        it_group_strag TYPE tt_lib_group_strategy
+      EXPORTING
+        et_approvers   TYPE tt_strategy_approvers.
 
   PROTECTED SECTION.
 
-    TYPES: BEGIN OF ts_lib_group_strategy,
-             group    TYPE t16fs-frggr,
-             strategy TYPE t16fs-frgsx,
-           END OF ts_lib_group_strategy.
-    TYPES: tt_lib_group_strategy TYPE STANDARD TABLE OF ts_lib_group_strategy WITH DEFAULT KEY.
+
     TYPES: BEGIN OF ts_depart_group_strategy,
              purchase_group      TYPE ekgrp,
              purchase_group_desc TYPE eknam.
@@ -418,19 +428,6 @@ CLASS zcl_rel_strategy_md_query DEFINITION
     DATA mv_langu TYPE sylangu.
     DATA mt_username_desc TYPE tt_username_desc.
 
-
-
-
-
-    "! <p class="shorttext synchronized">Devuelve los aprobadores de una estrategia</p>
-    "! @parameter it_group_strag | <p class="shorttext synchronized">Grupo y estrategia a buscar los datos</p>
-    "! @parameter iv_filter_lib_code | <p class="shorttext synchronized">Filtra los registros del codigo de liberación</p>
-    "! @parameter et_strategy | <p class="shorttext synchronized">Aprobadores de la estrategia</p>
-    METHODS get_approvers_strategy
-      IMPORTING
-        it_group_strag TYPE tt_lib_group_strategy
-      EXPORTING
-        et_approvers   TYPE tt_strategy_approvers.
 
     "! <p class="shorttext synchronized">Devuelvo grupo y strategia a partir grupos de compras</p>
     "! @parameter iv_purchase_group | <p class="shorttext synchronized">Grupo de compras</p>
